@@ -70,8 +70,21 @@ namespace lsp
             vChannels       = NULL;
             vBuffer         = NULL;
 
+            fDepthMin       = 0.0f;
+            fDepth          = 0.0f;
+            nPhaseStep      = 0;
+            fDryGain        = 0.0f;
+            fWetGain        = 0.0f;
+
             pBypass         = NULL;
-            pGainOut        = NULL;
+            pDepthMin       = NULL;
+            pDepth          = NULL;
+            pRate           = NULL;
+            pAmount         = NULL;
+            pInitPhase      = NULL;
+            pDry            = NULL;
+            pWet            = NULL;
+            pOutGain        = NULL;
 
             pData           = NULL;
         }
@@ -107,25 +120,20 @@ namespace lsp
                 channel_t *c            = &vChannels[i];
 
                 // Construct in-place DSP processors
-                c->sLine.construct();
                 c->sBypass.construct();
+                c->sRing.construct();
 
-                // Initialize fields
-                c->nDelay               = 0;
-                c->fDryGain             = 0.0f;
-                c->fWetGain             = 0.0f;
+                c->nInitPhase           = 0;
+                c->nPhase               = 0;
 
                 c->pIn                  = NULL;
                 c->pOut                 = NULL;
-                c->pDelay               = NULL;
-                c->pDry                 = NULL;
-                c->pWet                 = NULL;
-
-                c->pOutDelay            = NULL;
+                c->pInLevel             = NULL;
+                c->pOutLevel            = NULL;
             }
 
             // Bind ports
-            lsp_trace("Binding ports");
+            lsp_trace("Binding input ports");
             size_t port_id      = 0;
 
             // Bind input audio ports
@@ -140,45 +148,18 @@ namespace lsp
             pBypass              = TRACE_PORT(ports[port_id++]);
 
             // Bind ports for audio processing channels
-            for (size_t i=0; i<nChannels; ++i)
-            {
-                channel_t *c            = &vChannels[i];
+//            lsp_trace("Binding channel ports");
+//            for (size_t i=0; i<nChannels; ++i)
+//            {
+//                channel_t *c            = &vChannels[i];
+//            }
 
-                if (i > 0)
-                {
-                    channel_t *pc           = &vChannels[0];
-
-                    // Share some controls across all channels
-                    c->pDelay               = pc->pDelay;
-                    c->pDry                 = pc->pDry;
-                    c->pWet                 = pc->pWet;
-                }
-                else
-                {
-                    // Initialize input controls for the first channel
-                    c->pDelay               = TRACE_PORT(ports[port_id++]);
-                    c->pDry                 = TRACE_PORT(ports[port_id++]);
-                    c->pWet                 = TRACE_PORT(ports[port_id++]);
-                }
-            }
-
-            // Bind output gain
-            pGainOut            = TRACE_PORT(ports[port_id++]);
 
             // Bind output meters
+            lsp_trace("Binding output meters");
             for (size_t i=0; i<nChannels; ++i)
             {
                 channel_t *c            = &vChannels[i];
-
-                if (i > 0)
-                {
-                    channel_t *pc           = &vChannels[0];
-                    // Share some meters across all channels
-                    c->pOutDelay            = pc->pOutDelay;
-                }
-                else
-                    c->pOutDelay            = TRACE_PORT(ports[port_id++]);
-
                 c->pInLevel             = TRACE_PORT(ports[port_id++]);
                 c->pOutLevel            = TRACE_PORT(ports[port_id++]);
             }
@@ -194,7 +175,8 @@ namespace lsp
                 for (size_t i=0; i<nChannels; ++i)
                 {
                     channel_t *c    = &vChannels[i];
-                    c->sLine.destroy();
+                    c->sBypass.destroy();
+                    c->sRing.destroy();
                 }
                 vChannels   = NULL;
             }
@@ -212,130 +194,47 @@ namespace lsp
         void flanger::update_sample_rate(long sr)
         {
             // Update sample rate for the bypass processors
+            size_t max_delay = dspu::millis_to_samples(sr, meta::flanger::DEPTH_MIN_MAX + meta::flanger::DEPTH_MAX);
+
             for (size_t i=0; i<nChannels; ++i)
             {
                 channel_t *c    = &vChannels[i];
-                c->sLine.init(dspu::millis_to_samples(sr, meta::flanger::DELAY_OUT_MAX_TIME));
+                c->sRing.init(max_delay + BUFFER_SIZE);
                 c->sBypass.init(sr);
             }
         }
 
         void flanger::update_settings()
         {
-            float out_gain          = pGainOut->value();
+            float out_gain          = pOutGain->value();
             bool bypass             = pBypass->value() >= 0.5f;
+            float rate              = pRate->value() / fSampleRate;
+
+            fDepthMin               = dspu::millis_to_samples(fSampleRate, pDepthMin->value());
+            fDepth                  = dspu::millis_to_samples(fSampleRate, pDepth->value());
+            nPhaseStep              = double(0x100000000LL) * rate;
+            fDryGain                = pDry->value() * out_gain;
+            fWetGain                = pWet->value() * out_gain;
 
             for (size_t i=0; i<nChannels; ++i)
             {
                 channel_t *c            = &vChannels[i];
 
                 // Store the parameters for each processor
-                c->fDryGain             = c->pDry->value() * out_gain;
-                c->fWetGain             = c->pWet->value() * out_gain;
-                c->nDelay               = c->pDelay->value();
+                c->nInitPhase           = nPhaseStep * (pInitPhase->value() / 360.0f);
 
                 // Update processors
-                c->sLine.set_delay(c->nDelay);
                 c->sBypass.set_bypass(bypass);
             }
         }
 
         void flanger::process(size_t samples)
         {
-            // Process each channel independently
-            for (size_t i=0; i<nChannels; ++i)
-            {
-                channel_t *c            = &vChannels[i];
-
-                // Get input and output buffers
-                const float *in         = c->pIn->buffer<float>();
-                float *out              = c->pOut->buffer<float>();
-                if ((in == NULL) || (out == NULL))
-                    continue;
-
-                // Input and output gain meters
-                float in_gain           = 0.0f;
-                float out_gain          = 0.0f;
-
-                // Process the channel with BUFFER_SIZE chunks
-                // Note: since input buffer pointer can be the same to output buffer pointer,
-                // we need to store the processed signal data to temporary buffer before
-                // it gets processed by the dspu::Bypass processor.
-                for (size_t n=0; n<samples; )
-                {
-                    size_t count            = lsp_min(samples - n, BUFFER_SIZE);
-
-                    // Pre-process signal (fill buffer)
-                    c->sLine.process_ramping(vBuffer, in, c->fWetGain, c->nDelay, samples);
-
-                    // Apply 'dry' control
-                    if (c->fDryGain > 0.0f)
-                        dsp::fmadd_k3(vBuffer, in, c->fDryGain, count);
-
-                    // Compute the gain of input and output signal.
-                    in_gain             = lsp_max(in_gain, dsp::abs_max(in, samples));
-                    out_gain            = lsp_max(out_gain, dsp::abs_max(vBuffer, samples));
-
-                    // Process the
-                    //  - dry (unprocessed) signal stored in 'in'
-                    //  - wet (processed) signal stored in 'vBuffer'
-                    // Output the result to 'out' buffer
-                    c->sBypass.process(out, in, vBuffer, count);
-
-                    // Increment pointers
-                    in          +=  count;
-                    out         +=  count;
-                    n           +=  count;
-                }
-
-                // Update meters
-                c->pInLevel->set_value(in_gain);
-                c->pOutLevel->set_value(out_gain);
-
-                // Output the delay value in milliseconds
-                float millis = dspu::samples_to_millis(fSampleRate, c->nDelay);
-                c->pOutDelay->set_value(millis);
-            }
         }
 
         void flanger::dump(dspu::IStateDumper *v) const
         {
-            // It is very useful to dump plugin state for debug purposes
-            v->write("nChannels", nChannels);
-            v->begin_array("vChannels", vChannels, nChannels);
-            for (size_t i=0; i<nChannels; ++i)
-            {
-                channel_t *c            = &vChannels[i];
-
-                v->begin_object(c, sizeof(channel_t));
-                {
-                    v->write_object("sLine", &c->sLine);
-                    v->write_object("sBypass", &c->sBypass);
-
-                    v->write("nDelay", c->nDelay);
-                    v->write("fDryGain", c->fDryGain);
-                    v->write("fWetWain", c->fWetGain);
-
-                    v->write("pIn", c->pIn);
-                    v->write("pOut", c->pOut);
-                    v->write("pDelay", c->pDelay);
-                    v->write("pDry", c->pDry);
-                    v->write("pWet", c->pWet);
-
-                    v->write("pOutDelay", c->pOutDelay);
-                    v->write("pInLevel", c->pInLevel);
-                    v->write("pOutLevel", c->pOutLevel);
-                }
-                v->end_object();
-            }
-            v->end_array();
-
-            v->write("vBuffer", vBuffer);
-
-            v->write("pBypass", pBypass);
-            v->write("pGainOut", pGainOut);
-
-            v->write("pData", pData);
+            // TODO
         }
 
     } /* namespace plugins */

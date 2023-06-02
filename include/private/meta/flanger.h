@@ -33,15 +33,25 @@ namespace lsp
     {
         typedef struct flanger
         {
-            static constexpr float  SAMPLES_MIN         = 0.0f;
-            static constexpr float  SAMPLES_MAX         = 10000.0f;
-            static constexpr float  SAMPLES_DFL         = 0.0f;
-            static constexpr float  SAMPLES_STEP        = 1.0f;
+            static constexpr float  DEPTH_MIN_MIN       = 0.0f;
+            static constexpr float  DEPTH_MIN_MAX       = 10.0f;
+            static constexpr float  DEPTH_MIN_DFL       = 0.1f;
+            static constexpr float  DEPTH_MIN_STEP      = 0.05f;
 
-            static constexpr float  TIME_MIN            = 0.0f;
-            static constexpr float  TIME_MAX            = 1000.0f;
-            static constexpr float  TIME_DFL            = 0.0f;
-            static constexpr float  TIME_STEP           = 0.01f;
+            static constexpr float  DEPTH_MIN           = 1.0f;
+            static constexpr float  DEPTH_MAX           = 20.0f;
+            static constexpr float  DEPTH_DFL           = 5.0f;
+            static constexpr float  DEPTH_STEP          = 0.05f;
+
+            static constexpr float  PHASE_MIN           = 0.0f;
+            static constexpr float  PHASE_MAX           = 360.0f;
+            static constexpr float  PHASE_DFL           = 0.0f;
+            static constexpr float  PHASE_STEP          = 0.5f;
+
+            static constexpr float  RATE_MIN            = 0.01f;
+            static constexpr float  RATE_MAX            = 20.0f;
+            static constexpr float  RATE_DFL            = 0.25f;
+            static constexpr float  RATE_STEP          = 0.01f;
 
             static constexpr float  DELAY_OUT_MAX_TIME  = 10000.0f;
         } flanger;

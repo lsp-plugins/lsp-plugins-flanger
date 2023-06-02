@@ -41,42 +41,41 @@ namespace lsp
         //-------------------------------------------------------------------------
         // Plugin metadata
 
-        // NOTE: Port identifiers should not be longer than 7 characters as it will overflow VST2 parameter name buffers
         static const port_t flanger_mono_ports[] =
         {
             // Input and output audio ports
             PORTS_MONO_PLUGIN,
 
-            // Input controls
             BYPASS,
-            INT_CONTROL("d_in", "Delay in samples", U_SAMPLES, flanger::SAMPLES),
+            CONTROL("dmin", "Min Depth", U_MSEC, flanger::DEPTH_MIN),
+            CONTROL("depth", "Depth", U_MSEC, flanger::DEPTH),
+            CONTROL("rate", "Rate", U_HZ, flanger::RATE),
+            AMP_GAIN10("amount", "The overall amount of the effect", 0.5f),
+            CYC_CONTROL("iphase", "Initial Phase", U_DEG, flanger::PHASE),
             DRY_GAIN(0.0f),
             WET_GAIN(1.0f),
             OUT_GAIN,
 
-            // Output controls
-            METER_MINMAX("d_out", "Delay time in milliseconds", U_MSEC, 0.0f, flanger::DELAY_OUT_MAX_TIME),
             METER_GAIN("min", "Input gain", GAIN_AMP_P_48_DB),
             METER_GAIN("mout", "Output gain", GAIN_AMP_P_48_DB),
 
             PORTS_END
         };
 
-        // NOTE: Port identifiers should not be longer than 7 characters as it will overflow VST2 parameter name buffers
         static const port_t flanger_stereo_ports[] =
         {
-            // Input and output audio ports
             PORTS_STEREO_PLUGIN,
 
-            // Input controls
             BYPASS,
-            INT_CONTROL("d_in", "Delay in samples", U_SAMPLES, flanger::SAMPLES),
+            CONTROL("dmin", "Min Depth", U_MSEC, flanger::DEPTH_MIN),
+            CONTROL("depth", "Depth", U_MSEC, flanger::DEPTH),
+            CONTROL("rate", "Rate", U_HZ, flanger::RATE),
+            AMP_GAIN10("amount", "The overall amount of the effect", 0.5f),
+            CYC_CONTROL("iphase", "Initial Phase", U_DEG, flanger::PHASE),
             DRY_GAIN(0.0f),
             WET_GAIN(1.0f),
             OUT_GAIN,
 
-            // Output controls
-            METER_MINMAX("d_out", "Delay time in milliseconds", U_MSEC, 0.0f, flanger::DELAY_OUT_MAX_TIME),
             METER_GAIN("min_l", "Input gain left",  GAIN_AMP_P_48_DB),
             METER_GAIN("mout_l", "Output gain left",  GAIN_AMP_P_48_DB),
             METER_GAIN("min_r", "Input gain right",  GAIN_AMP_P_48_DB),
@@ -85,9 +84,9 @@ namespace lsp
             PORTS_END
         };
 
-        static const int plugin_classes[]       = { C_DELAY, -1 };
-        static const int clap_features_mono[]   = { CF_AUDIO_EFFECT, CF_UTILITY, CF_MONO, -1 };
-        static const int clap_features_stereo[] = { CF_AUDIO_EFFECT, CF_UTILITY, CF_STEREO, -1 };
+        static const int plugin_classes[]       = { C_FLANGER, -1 };
+        static const int clap_features_mono[]   = { CF_AUDIO_EFFECT, CF_FLANGER, CF_MONO, -1 };
+        static const int clap_features_stereo[] = { CF_AUDIO_EFFECT, CF_FLANGER, CF_STEREO, -1 };
 
         const meta::bundle_t flanger_bundle =
         {
@@ -100,15 +99,15 @@ namespace lsp
 
         const plugin_t flanger_mono =
         {
-            "Pluginschablone Mono",
-            "Plugin Template Mono",
-            "PS1M",
+            "Flanger Mono",
+            "Flanger Mono",
+            "F1M",
             &developers::v_sadovnikov,
             "flanger_mono",
             LSP_LV2_URI("flanger_mono"),
             LSP_LV2UI_URI("flanger_mono"),
-            "xxxx",         // TODO: fill valid VST2 ID (4 letters/digits)
-            1,              // TODO: fill valid LADSPA identifier (positive decimal integer)
+            "lf1m",
+            LSP_LADSPA_FLANGER_BASE + 0,
             LSP_LADSPA_URI("flanger_mono"),
             LSP_CLAP_URI("flanger_mono"),
             LSP_PLUGINS_FLANGER_VERSION,
@@ -116,7 +115,7 @@ namespace lsp
             clap_features_mono,
             E_DUMP_STATE,
             flanger_mono_ports,
-            "template/plugin.xml",
+            "effects/flanger.xml",
             NULL,
             mono_plugin_port_groups,
             &flanger_bundle
@@ -124,15 +123,15 @@ namespace lsp
 
         const plugin_t flanger_stereo =
         {
-            "Pluginschablone Stereo",
-            "Plugin Template Stereo",
-            "PS1S",
+            "Flanger Stereo",
+            "Flanger Stereo",
+            "F1S",
             &developers::v_sadovnikov,
             "flanger_stereo",
             LSP_LV2_URI("flanger_stereo"),
             LSP_LV2UI_URI("flanger_stereo"),
-            "yyyy",         // TODO: fill valid VST2 ID (4 letters/digits)
-            2,              // TODO: fill valid LADSPA identifier (positive decimal integer)
+            "lf1s",
+            LSP_LADSPA_FLANGER_BASE + 1,
             LSP_LADSPA_URI("flanger_stereo"),
             LSP_CLAP_URI("flanger_stereo"),
             LSP_PLUGINS_FLANGER_VERSION,
@@ -140,7 +139,7 @@ namespace lsp
             clap_features_stereo,
             E_DUMP_STATE,
             flanger_stereo_ports,
-            "template/plugin.xml",
+            "effects/flanger.xml",
             NULL,
             stereo_plugin_port_groups,
             &flanger_bundle

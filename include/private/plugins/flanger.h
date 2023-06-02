@@ -23,6 +23,7 @@
 #define PRIVATE_PLUGINS_FLANGER_H_
 
 #include <lsp-plug.in/dsp-units/util/Delay.h>
+#include <lsp-plug.in/dsp-units/util/RingBuffer.h>
 #include <lsp-plug.in/dsp-units/ctl/Bypass.h>
 #include <lsp-plug.in/plug-fw/plug.h>
 #include <private/meta/flanger.h>
@@ -41,33 +42,21 @@ namespace lsp
                 flanger (const flanger &);
 
             protected:
-                enum mode_t
-                {
-                    CD_MONO,
-                    CD_STEREO,
-                    CD_X2_STEREO
-                };
-
                 typedef struct channel_t
                 {
                     // DSP processing modules
-                    dspu::Delay         sLine;              // Delay line
                     dspu::Bypass        sBypass;            // Bypass
+                    dspu::RingBuffer    sRing;              // Ring buffer for flanger effect processing
 
                     // Parameters
-                    ssize_t             nDelay;             // Actual delay of the signal
-                    float               fDryGain;           // Dry gain (unprocessed signal)
-                    float               fWetGain;           // Wet gain (processed signal)
+                    uint32_t            nInitPhase;         // Initial phase value
+                    uint32_t            nPhase;             // Current phase value
 
                     // Input ports
                     plug::IPort        *pIn;                // Input port
                     plug::IPort        *pOut;               // Output port
-                    plug::IPort        *pDelay;             // Delay (in samples)
-                    plug::IPort        *pDry;               // Dry control
-                    plug::IPort        *pWet;               // Wet control
 
                     // Output ports
-                    plug::IPort        *pOutDelay;          // Output delay time
                     plug::IPort        *pInLevel;           // Input signal level
                     plug::IPort        *pOutLevel;          // Output signal level
                 } channel_t;
@@ -77,8 +66,21 @@ namespace lsp
                 channel_t          *vChannels;          // Delay channels
                 float              *vBuffer;            // Temporary buffer for audio processing
 
+                float               fDepthMin;          // Minimum depth value
+                float               fDepth;             // Depth value
+                uint32_t            nPhaseStep;         // Phase increment
+                float               fDryGain;           // Dry gain (unprocessed signal)
+                float               fWetGain;           // Wet gain (processed signal)
+
                 plug::IPort        *pBypass;            // Bypass
-                plug::IPort        *pGainOut;           // Output gain
+                plug::IPort        *pDepthMin;          // Minimal depth
+                plug::IPort        *pDepth;             // Depth
+                plug::IPort        *pRate;              // Rate
+                plug::IPort        *pAmount;            // Amount
+                plug::IPort        *pInitPhase;         // Initial Phase
+                plug::IPort        *pDry;               // Dry gain
+                plug::IPort        *pWet;               // Wet gain
+                plug::IPort        *pOutGain;           // Output gain
 
                 uint8_t            *pData;              // Allocated data
 
