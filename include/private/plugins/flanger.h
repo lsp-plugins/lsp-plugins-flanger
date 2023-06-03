@@ -50,7 +50,10 @@ namespace lsp
 
                     // Parameters
                     uint32_t            nInitPhase;         // Initial phase value
-                    uint32_t            nPhase;             // Current phase value
+                    float               fFeedback;          // Feedback sample
+                    float              *vBuffer;            // Processed signal
+                    float              *vIn;                // Input buffer
+                    float              *vOut;               // Output buffer
 
                     // Input ports
                     plug::IPort        *pIn;                // Input port
@@ -61,14 +64,23 @@ namespace lsp
                     plug::IPort        *pOutLevel;          // Output signal level
                 } channel_t;
 
+                typedef float (*lfo_func_t)(float phase);
+
+            protected:
+                static lfo_func_t   all_lfo_functions[];
+
             protected:
                 size_t              nChannels;          // Number of channels
                 channel_t          *vChannels;          // Delay channels
                 float              *vBuffer;            // Temporary buffer for audio processing
 
-                float               fDepthMin;          // Minimum depth value
-                float               fDepth;             // Depth value
+                size_t              nDepthMin;          // Minimum depth value in samples
+                size_t              nDepth;             // Depth value in samples
+                uint32_t            nPhase;             // Current phase value
                 uint32_t            nPhaseStep;         // Phase increment
+                lfo_func_t          pLfoFunc;           // LFO function
+                float               fAmount;            // The overall amount
+                float               fFeedGain;          // Feed-back gain
                 float               fDryGain;           // Dry gain (unprocessed signal)
                 float               fWetGain;           // Wet gain (processed signal)
 
@@ -76,13 +88,27 @@ namespace lsp
                 plug::IPort        *pDepthMin;          // Minimal depth
                 plug::IPort        *pDepth;             // Depth
                 plug::IPort        *pRate;              // Rate
+                plug::IPort        *pFunc;              // Oscillator function
                 plug::IPort        *pAmount;            // Amount
                 plug::IPort        *pInitPhase;         // Initial Phase
+                plug::IPort        *pFeedGain;          // Feedback gain
+                plug::IPort        *pFeedPhase;         // Feedback phase
                 plug::IPort        *pDry;               // Dry gain
                 plug::IPort        *pWet;               // Wet gain
                 plug::IPort        *pOutGain;           // Output gain
 
                 uint8_t            *pData;              // Allocated data
+
+            protected:
+                static float        lfo_triangular(float phase);
+                static float        lfo_sine(float phase);
+                static float        lfo_cubic(float phase);
+                static float        lfo_parabolic(float phase);
+                static float        lfo_rev_parabolic(float phase);
+                static float        lfo_logarithmic(float phase);
+                static float        lfo_rev_logarithmic(float phase);
+                static float        lfo_sqrt(float phase);
+                static float        lfo_rev_sqrt(float phase);
 
             public:
                 explicit flanger(const meta::plugin_t *meta);

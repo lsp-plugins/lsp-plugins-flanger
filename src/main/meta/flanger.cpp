@@ -38,6 +38,30 @@ namespace lsp
 {
     namespace meta
     {
+        static const port_item_t oscillator_functions[] =
+        {
+            { "Triangular",             "flanger.osc.triangular"            },
+            { "Sine",                   "flanger.osc.sine"                  },
+            { "Cubic",                  "flanger.osc.cubic"                 },
+            { "Parabolic",              "flanger.osc.parabolic"             },
+            { "Reverse Parabolic",      "flanger.osc.reverse_parabolic"     },
+            { "Logarithmic",            "flanger.osc.logarithmic"           },
+            { "Reverse Logarithmic",    "flanger.osc.reverse_logarithmic"   },
+            { "Square Root",            "flanger.osc.square_root"           },
+            { "Reverse Square Root",    "flanger.osc.reverse_square_root"   },
+            { NULL, NULL }
+        };
+
+//        static float        lfo_triangular(float phase);
+//        static float        lfo_sine(float phase);
+//        static float        lfo_cubic(float phase);
+//        static float        lfo_parabolic(float phase);
+//        static float        lfo_rev_parabolic(float phase);
+//        static float        lfo_logarithmic(float phase);
+//        static float        lfo_rev_logarithmic(float phase);
+//        static float        lfo_sqrt(float phase);
+//        static float        lfo_rev_sqrt(float phase);
+
         //-------------------------------------------------------------------------
         // Plugin metadata
 
@@ -50,8 +74,11 @@ namespace lsp
             CONTROL("dmin", "Min Depth", U_MSEC, flanger::DEPTH_MIN),
             CONTROL("depth", "Depth", U_MSEC, flanger::DEPTH),
             CONTROL("rate", "Rate", U_HZ, flanger::RATE),
+            COMBO("func", "Oscillator function", 0, oscillator_functions),
             AMP_GAIN10("amount", "The overall amount of the effect", 0.5f),
             CYC_CONTROL("iphase", "Initial Phase", U_DEG, flanger::PHASE),
+            AMP_GAIN1("fgain", "Feedback Gain", 0.0f),
+            SWITCH("fphase", "Feedback Phase Switch", 0.0f),
             DRY_GAIN(0.0f),
             WET_GAIN(1.0f),
             OUT_GAIN,
@@ -70,8 +97,11 @@ namespace lsp
             CONTROL("dmin", "Min Depth", U_MSEC, flanger::DEPTH_MIN),
             CONTROL("depth", "Depth", U_MSEC, flanger::DEPTH),
             CONTROL("rate", "Rate", U_HZ, flanger::RATE),
+            COMBO("func", "Oscillator function", 0, oscillator_functions),
             AMP_GAIN10("amount", "The overall amount of the effect", 0.5f),
             CYC_CONTROL("iphase", "Initial Phase", U_DEG, flanger::PHASE),
+            AMP_GAIN1("fgain", "Feedback Gain", 0.0f),
+            SWITCH("fphase", "Feedback Phase Switch", 0.0f),
             DRY_GAIN(0.0f),
             WET_GAIN(1.0f),
             OUT_GAIN,
