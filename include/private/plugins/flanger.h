@@ -76,24 +76,29 @@ namespace lsp
                 size_t              nChannels;          // Number of channels
                 channel_t          *vChannels;          // Delay channels
                 float              *vBuffer;            // Temporary buffer for audio processing
+                float              *vLfoPhase;          // LFO mesh phase data
+                float              *vLfoMesh;           // LFO mesh amplitude data
 
                 size_t              nDepthMin;          // Minimum depth value in samples
                 size_t              nDepth;             // Depth value in samples
                 uint32_t            nInitPhase;         // Initial phase
                 uint32_t            nPhase;             // Current phase value
                 uint32_t            nPhaseStep;         // Phase increment
+                size_t              nLfoType;           // Type of LFO
                 lfo_func_t          pLfoFunc;           // LFO function
                 float               fAmount;            // The overall amount
                 float               fFeedGain;          // Feed-back gain
                 float               fDryGain;           // Dry gain (unprocessed signal)
                 float               fWetGain;           // Wet gain (processed signal)
+                bool                bSyncLfo;           // Synchronize LFO graph
 
                 plug::IPort        *pBypass;            // Bypass
                 plug::IPort        *pRate;              // Rate
-                plug::IPort        *pFunc;              // Oscillator function
+                plug::IPort        *pLfoType;           // Oscillator type
                 plug::IPort        *pInitPhase;         // Initial Phase
                 plug::IPort        *pPhaseDiff;         // Phase difference between left and right
                 plug::IPort        *pReset;             // Reset phase to default
+                plug::IPort        *pLfoMesh;           // LFO mesh
 
                 plug::IPort        *pDepthMin;          // Minimal depth
                 plug::IPort        *pDepth;             // Depth
@@ -109,26 +114,32 @@ namespace lsp
             protected:
                 static float        lfo_triangular(float phase);
                 static float        lfo_sine(float phase);
+                static float        lfo_step_sine(float phase);
                 static float        lfo_cubic(float phase);
+                static float        lfo_step_cubic(float phase);
                 static float        lfo_parabolic(float phase);
                 static float        lfo_rev_parabolic(float phase);
                 static float        lfo_logarithmic(float phase);
                 static float        lfo_rev_logarithmic(float phase);
                 static float        lfo_sqrt(float phase);
                 static float        lfo_rev_sqrt(float phase);
+                static float        lfo_circular(float phase);
+                static float        lfo_rev_circular(float phase);
 
             public:
                 explicit flanger(const meta::plugin_t *meta);
-                virtual ~flanger();
+                virtual ~flanger() override;
 
-                virtual void        init(plug::IWrapper *wrapper, plug::IPort **ports);
-                void                destroy();
+                virtual void        init(plug::IWrapper *wrapper, plug::IPort **ports) override;
+                virtual void        destroy() override;
 
             public:
-                virtual void        update_sample_rate(long sr);
-                virtual void        update_settings();
-                virtual void        process(size_t samples);
-                virtual void        dump(dspu::IStateDumper *v) const;
+                virtual void        update_sample_rate(long sr) override;
+                virtual void        update_settings() override;
+                virtual void        process(size_t samples) override;
+                virtual void        ui_activated() override;
+                virtual bool        inline_display(plug::ICanvas *cv, size_t width, size_t height) override;
+                virtual void        dump(dspu::IStateDumper *v) const override;
         };
 
     } /* namespace plugins */

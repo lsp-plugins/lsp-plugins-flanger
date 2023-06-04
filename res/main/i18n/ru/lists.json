@@ -1,14 +1,18 @@
 {
 	"flanger": {
 		"osc": {
+			"circular": "Окружность",
 			"cubic": "Кубическая",
 			"logarithmic": "Логарифмическая",
 			"parabolic": "Параболическая",
+			"reverse_circular": "Инверсная окружность",
 			"reverse_logarithmic": "Инверсаня логарифмическая",
 			"reverse_parabolic": "Инверсная параболическая",
 			"reverse_square_root": "Инверсный квадратный корень",
 			"sine": "Синусоидальная",
 			"square_root": "Квадратный корень",
+			"stepped_cubic": "Ступенчатая кубическая",
+			"stepped_sine": "Ступенчатая синусоидальная",
 			"triangular": "Треугольная"
 		}
 	}

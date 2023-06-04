@@ -51,7 +51,9 @@ namespace lsp
             static constexpr float  RATE_MIN            = 0.01f;
             static constexpr float  RATE_MAX            = 20.0f;
             static constexpr float  RATE_DFL            = 0.25f;
-            static constexpr float  RATE_STEP          = 0.01f;
+            static constexpr float  RATE_STEP           = 0.01f;
+
+            static constexpr size_t LFO_MESH_SIZE       = 361;
 
             static constexpr float  DELAY_OUT_MAX_TIME  = 10000.0f;
         } flanger;

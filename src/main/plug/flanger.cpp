@@ -31,7 +31,7 @@
 #define BUFFER_SIZE         0x1000U
 
 static constexpr float PHASE_COEFF          = 1.0f / float(0x100000000LL);
-static constexpr float REV_LN10             = 1.0f / M_LN10;
+static constexpr float REV_LN100             = 0.5f / M_LN10;
 
 namespace lsp
 {
@@ -64,13 +64,17 @@ namespace lsp
         {
             flanger::lfo_triangular,
             flanger::lfo_sine,
+            flanger::lfo_step_sine,
             flanger::lfo_cubic,
+            flanger::lfo_step_cubic,
             flanger::lfo_parabolic,
             flanger::lfo_rev_parabolic,
             flanger::lfo_logarithmic,
             flanger::lfo_rev_logarithmic,
             flanger::lfo_sqrt,
-            flanger::lfo_rev_sqrt
+            flanger::lfo_rev_sqrt,
+            flanger::lfo_circular,
+            flanger::lfo_rev_circular,
         };
 
         flanger::flanger(const meta::plugin_t *meta):
@@ -85,24 +89,29 @@ namespace lsp
             // Initialize other parameters
             vChannels       = NULL;
             vBuffer         = NULL;
+            vLfoPhase       = NULL;
+            vLfoMesh        = NULL;
 
             nDepthMin       = 0;
             nDepth          = 0;
             nInitPhase      = 0;
             nPhase          = 0;
             nPhaseStep      = 0;
+            nLfoType        = -1;
             pLfoFunc        = lfo_triangular;
             fAmount         = 0.0f;
             fFeedGain       = 0.0f;
             fDryGain        = 0.0f;
             fWetGain        = 0.0f;
+            bSyncLfo        = true;
 
             pBypass         = NULL;
             pRate           = NULL;
-            pFunc           = NULL;
+            pLfoType        = NULL;
             pInitPhase      = NULL;
             pPhaseDiff      = NULL;
             pReset          = NULL;
+            pLfoMesh        = NULL;
 
             pDepthMin       = NULL;
             pDepth          = NULL;
@@ -128,8 +137,14 @@ namespace lsp
 
             // Estimate the number of bytes to allocate
             size_t szof_channels    = align_size(sizeof(channel_t) * nChannels, OPTIMAL_ALIGN);
+            size_t mesh_buf_sz      = align_size(meta::flanger::LFO_MESH_SIZE * sizeof(float), OPTIMAL_ALIGN);
             size_t buf_sz           = BUFFER_SIZE * sizeof(float);
-            size_t alloc            = szof_channels + buf_sz + buf_sz * nChannels;
+            size_t alloc            =
+                szof_channels +         // vChannels
+                buf_sz +                // vBuffer
+                mesh_buf_sz +           // vLfoPhase
+                mesh_buf_sz +           // vLfoMesh
+                buf_sz * nChannels;     // channel_t::vBuffer
 
             // Allocate memory-aligned data
             uint8_t *ptr            = alloc_aligned<uint8_t>(pData, alloc, OPTIMAL_ALIGN);
@@ -141,6 +156,10 @@ namespace lsp
             ptr                    += szof_channels;
             vBuffer                 = reinterpret_cast<float *>(ptr);
             ptr                    += buf_sz;
+            vLfoPhase               = reinterpret_cast<float *>(ptr);
+            ptr                    += mesh_buf_sz;
+            vLfoMesh                = reinterpret_cast<float *>(ptr);
+            ptr                    += mesh_buf_sz;
 
             for (size_t i=0; i < nChannels; ++i)
             {
@@ -151,6 +170,7 @@ namespace lsp
                 c->sRing.construct();
 
                 c->nPhaseShift          = 0;
+                c->fFeedback            = 0.0f;
                 c->vBuffer              = reinterpret_cast<float *>(ptr);
                 ptr                    += buf_sz;
                 c->vIn                  = NULL;
@@ -178,11 +198,13 @@ namespace lsp
             lsp_trace("Binding common ports");
             pBypass             = TRACE_PORT(ports[port_id++]);
             pRate               = TRACE_PORT(ports[port_id++]);
-            pFunc               = TRACE_PORT(ports[port_id++]);
+            pLfoType            = TRACE_PORT(ports[port_id++]);
             pInitPhase          = TRACE_PORT(ports[port_id++]);
             if (nChannels > 1)
                 pPhaseDiff          = TRACE_PORT(ports[port_id++]);
             pReset              = TRACE_PORT(ports[port_id++]);
+            pLfoMesh            = TRACE_PORT(ports[port_id++]);
+
             pDepthMin           = TRACE_PORT(ports[port_id++]);
             pDepth              = TRACE_PORT(ports[port_id++]);
             pAmount             = TRACE_PORT(ports[port_id++]);
@@ -255,6 +277,7 @@ namespace lsp
             bool bypass             = pBypass->value() >= 0.5f;
             float rate              = pRate->value() / fSampleRate;
             float feed_gain         = pFeedGain->value();
+            size_t lfo_type         = size_t(pLfoType->value());
 
             sReset.submit(pReset->value());
 
@@ -266,7 +289,23 @@ namespace lsp
             fDryGain                = pDry->value() * out_gain;
             fWetGain                = pWet->value() * out_gain;
             fAmount                 = pAmount->value();
-            pLfoFunc                = all_lfo_functions[size_t(pFunc->value())];
+
+            // Update the LFO information
+            if (lfo_type != nLfoType)
+            {
+                nLfoType                = lfo_type;
+                pLfoFunc                = all_lfo_functions[lfo_type];
+                bSyncLfo                = true;
+
+                // Update the mesh contents
+                float k                 = 1.0f / (meta::flanger::LFO_MESH_SIZE - 1);
+                for (size_t i=0; i<meta::flanger::LFO_MESH_SIZE; ++i)
+                {
+                    float phase             = i * k;
+                    vLfoPhase[i]            = phase * 360.0f;
+                    vLfoMesh[i]             = pLfoFunc(phase);
+                }
+            }
 
             for (size_t i=0; i<nChannels; ++i)
             {
@@ -282,12 +321,23 @@ namespace lsp
 
         float flanger::lfo_triangular(float phase)
         {
-            return (phase < 0.5f) ? phase * 2.0f : 1.0f - phase * 2.0f;
+            return (phase < 0.5f) ? phase * 2.0f : (1.0f - phase) * 2.0f;
         }
 
         float flanger::lfo_sine(float phase)
         {
-            return sinf(2.0f * M_PI * phase);
+            return 0.5f - 0.5f * cosf(2.0f * M_PI * phase);
+        }
+
+        float flanger::lfo_step_sine(float phase)
+        {
+            if ((phase >= 0.25f) && (phase < 0.75f))
+            {
+                phase -= 0.25f;
+                return 0.75f - 0.25f * cosf(4.0f * M_PI * phase);
+            }
+
+            return 0.25f - 0.25f * cosf(4.0f * M_PI * phase);
         }
 
         float flanger::lfo_cubic(float phase)
@@ -298,8 +348,18 @@ namespace lsp
             return phase * phase * (12.0f - 16.0f * phase);
         }
 
+        float flanger::lfo_step_cubic(float phase)
+        {
+            if (phase >= 0.5f)
+                phase      = 1.0f - phase;
+
+            phase      -= 0.25f;
+            return 0.5f + 32.0f * phase * phase * phase;
+        }
+
         float flanger::lfo_parabolic(float phase)
         {
+            phase -= 0.5f;
             return 1.0f - 4.0f * phase * phase;
         }
 
@@ -315,28 +375,53 @@ namespace lsp
         {
             if (phase >= 0.5f)
                 phase      = 1.0f - phase;
-            return logf(1.0f + 18.0f *phase) * REV_LN10;
+            return logf(1.0f + 198.0f *phase) * REV_LN100;
         }
 
         float flanger::lfo_rev_logarithmic(float phase)
         {
             if (phase >= 0.5f)
                 phase      = 1.0f - phase;
-            return 1.0f - logf(1.0f + 18.0f *phase) * REV_LN10;
+            return 1.0f - logf(100.0f - 198.0f * phase) * REV_LN100;
         }
 
         float flanger::lfo_sqrt(float phase)
         {
-            if (phase >= 0.5f)
-                phase      = 1.0f - phase;
-            return sqrtf(phase * 2.0f);
+            phase      -= 0.5f;
+            return sqrtf(1.0f - 4.0f * phase * phase);
         }
 
         float flanger::lfo_rev_sqrt(float phase)
         {
             if (phase >= 0.5f)
-                phase      = 1.0f - phase;
-            return 1.0f - sqrtf(phase * 2.0f);
+                phase          -= 1.0f;
+            return 1.0f - sqrtf(1.0f - 4.0f * phase * phase);
+        }
+
+        float flanger::lfo_circular(float phase)
+        {
+            if (phase < 0.25f)
+                return 0.5f - sqrtf(0.25f - 4.0f * phase * phase);
+
+            if (phase > 0.75f)
+            {
+                phase          -= 1.0f;
+                return 0.5f - sqrtf(0.25f - 4.0f * phase * phase);
+            }
+
+            phase      -= 0.5f;
+            return 0.5f + sqrtf(0.25f - 4.0f * phase * phase);
+        }
+
+        float flanger::lfo_rev_circular(float phase)
+        {
+            if (phase >= 0.5f)
+                phase   = 1.0f - phase;
+
+            phase -= 0.25f;
+            return (phase < 0.0f) ?
+                sqrtf(0.25f - 4.0f * phase * phase) :
+                1.0f - sqrtf(0.25f - 4.0f * phase * phase);
         }
 
         void flanger::process(size_t samples)
@@ -431,6 +516,35 @@ namespace lsp
 
                 offset                 += to_do;
             }
+
+            // Need to synchronize LFO mesh?
+            if (bSyncLfo)
+            {
+                plug::mesh_t *lfo       = (pLfoMesh != NULL) ? pLfoMesh->buffer<plug::mesh_t>() : NULL;
+                if ((lfo != NULL) && (lfo->isEmpty()))
+                {
+                    dsp::copy(lfo->pvData[0], vLfoPhase, meta::flanger::LFO_MESH_SIZE);
+                    dsp::copy(lfo->pvData[1], vLfoMesh, meta::flanger::LFO_MESH_SIZE);
+                    lfo->data(2, meta::flanger::LFO_MESH_SIZE);
+
+                    bSyncLfo = false;
+                }
+            }
+
+            // Request the inline display for redraw
+            if (pWrapper != NULL)
+                pWrapper->query_display_draw();
+        }
+
+        void flanger::ui_activated()
+        {
+            bSyncLfo        = true;
+        }
+
+        bool flanger::inline_display(plug::ICanvas *cv, size_t width, size_t height)
+        {
+            // TODO
+            return false;
         }
 
         void flanger::dump(dspu::IStateDumper *v) const

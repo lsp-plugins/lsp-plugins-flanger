@@ -42,13 +42,17 @@ namespace lsp
         {
             { "Triangular",             "flanger.osc.triangular"            },
             { "Sine",                   "flanger.osc.sine"                  },
+            { "Stepped Sine",           "flanger.osc.stepped_sine"          },
             { "Cubic",                  "flanger.osc.cubic"                 },
+            { "Stepped Cubic",          "flanger.osc.stepped_cubic"         },
             { "Parabolic",              "flanger.osc.parabolic"             },
             { "Reverse Parabolic",      "flanger.osc.reverse_parabolic"     },
             { "Logarithmic",            "flanger.osc.logarithmic"           },
             { "Reverse Logarithmic",    "flanger.osc.reverse_logarithmic"   },
             { "Square Root",            "flanger.osc.square_root"           },
             { "Reverse Square Root",    "flanger.osc.reverse_square_root"   },
+            { "Circular",               "flanger.osc.circular"              },
+            { "Reverse Circular",       "flanger.osc.reverse_circular"      },
             { NULL, NULL }
         };
 
@@ -65,6 +69,7 @@ namespace lsp
             COMBO("type", "Oscillator type", 0, oscillator_functions),
             CYC_CONTROL("iphase", "Initial Phase", U_DEG, flanger::PHASE),
             TRIGGER("reset", "Reset phase to initial"),
+            MESH("lfo", "LFO graph", 2, flanger::LFO_MESH_SIZE),
 
             CONTROL("dmin", "Min Depth", U_MSEC, flanger::DEPTH_MIN),
             CONTROL("depth", "Depth", U_MSEC, flanger::DEPTH),
@@ -93,6 +98,7 @@ namespace lsp
             CYC_CONTROL("iphase", "Initial Phase", U_DEG, flanger::PHASE),
             CYC_CONTROL("dphase", "Phase difference between left and right", U_DEG, flanger::PHASE),
             TRIGGER("reset", "Reset phase to initial"),
+            MESH("lfo", "LFO graph", 2, flanger::LFO_MESH_SIZE),
 
             CONTROL("dmin", "Min Depth", U_MSEC, flanger::DEPTH_MIN),
             CONTROL("depth", "Depth", U_MSEC, flanger::DEPTH),
@@ -141,7 +147,7 @@ namespace lsp
             LSP_PLUGINS_FLANGER_VERSION,
             plugin_classes,
             clap_features_mono,
-            E_DUMP_STATE,
+            E_DUMP_STATE | E_INLINE_DISPLAY,
             flanger_mono_ports,
             "effects/flanger.xml",
             NULL,
@@ -165,7 +171,7 @@ namespace lsp
             LSP_PLUGINS_FLANGER_VERSION,
             plugin_classes,
             clap_features_stereo,
-            E_DUMP_STATE,
+            E_DUMP_STATE | E_INLINE_DISPLAY,
             flanger_stereo_ports,
             "effects/flanger.xml",
             NULL,
