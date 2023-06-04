@@ -88,6 +88,7 @@ namespace lsp
 
             nDepthMin       = 0;
             nDepth          = 0;
+            nInitPhase      = 0;
             nPhase          = 0;
             nPhaseStep      = 0;
             pLfoFunc        = lfo_triangular;
@@ -97,12 +98,15 @@ namespace lsp
             fWetGain        = 0.0f;
 
             pBypass         = NULL;
-            pDepthMin       = NULL;
-            pDepth          = NULL;
             pRate           = NULL;
             pFunc           = NULL;
-            pAmount         = NULL;
             pInitPhase      = NULL;
+            pPhaseDiff      = NULL;
+            pReset          = NULL;
+
+            pDepthMin       = NULL;
+            pDepth          = NULL;
+            pAmount         = NULL;
             pFeedGain       = NULL;
             pFeedPhase      = NULL;
             pDry            = NULL;
@@ -146,7 +150,7 @@ namespace lsp
                 c->sBypass.construct();
                 c->sRing.construct();
 
-                c->nInitPhase           = 0;
+                c->nPhaseShift          = 0;
                 c->vBuffer              = reinterpret_cast<float *>(ptr);
                 ptr                    += buf_sz;
                 c->vIn                  = NULL;
@@ -173,12 +177,15 @@ namespace lsp
             // Bind bypass
             lsp_trace("Binding common ports");
             pBypass             = TRACE_PORT(ports[port_id++]);
-            pDepthMin           = TRACE_PORT(ports[port_id++]);
-            pDepth              = TRACE_PORT(ports[port_id++]);
             pRate               = TRACE_PORT(ports[port_id++]);
             pFunc               = TRACE_PORT(ports[port_id++]);
-            pAmount             = TRACE_PORT(ports[port_id++]);
             pInitPhase          = TRACE_PORT(ports[port_id++]);
+            if (nChannels > 1)
+                pPhaseDiff          = TRACE_PORT(ports[port_id++]);
+            pReset              = TRACE_PORT(ports[port_id++]);
+            pDepthMin           = TRACE_PORT(ports[port_id++]);
+            pDepth              = TRACE_PORT(ports[port_id++]);
+            pAmount             = TRACE_PORT(ports[port_id++]);
             pFeedGain           = TRACE_PORT(ports[port_id++]);
             pFeedPhase          = TRACE_PORT(ports[port_id++]);
             pDry                = TRACE_PORT(ports[port_id++]);
@@ -249,9 +256,12 @@ namespace lsp
             float rate              = pRate->value() / fSampleRate;
             float feed_gain         = pFeedGain->value();
 
+            sReset.submit(pReset->value());
+
             nDepthMin               = dspu::millis_to_samples(fSampleRate, pDepthMin->value());
             nDepth                  = dspu::millis_to_samples(fSampleRate, pDepth->value());
             nPhaseStep              = double(0x100000000LL) * rate;
+            nInitPhase              = uint32_t(nPhaseStep * double(pInitPhase->value() / 360.0f));
             fFeedGain               = (pFeedPhase->value() >= 0.5f) ? -feed_gain : feed_gain;
             fDryGain                = pDry->value() * out_gain;
             fWetGain                = pWet->value() * out_gain;
@@ -263,7 +273,7 @@ namespace lsp
                 channel_t *c            = &vChannels[i];
 
                 // Store the parameters for each processor
-                c->nInitPhase           = nPhaseStep * (pInitPhase->value() / 360.0f);
+                c->nPhaseShift          = (i > 0) ? nPhaseStep * (pPhaseDiff->value() / 360.0f) : 0;
 
                 // Update processors
                 c->sBypass.set_bypass(bypass);
@@ -331,14 +341,25 @@ namespace lsp
 
         void flanger::process(size_t samples)
         {
+            // Reset phase if phase request is pending
+            if (sReset.pending())
+            {
+                nPhase                  = nInitPhase;
+                sReset.commit();
+            }
+
+            // Perform the routing
             for (size_t i=0; i<nChannels; ++i)
             {
                 channel_t *c            = &vChannels[i];
                 c->vIn                  = c->pIn->buffer<float>();
                 c->vOut                 = c->pOut->buffer<float>();
+
+                // Measure the input level
+                c->pInLevel->set_value(dsp::abs_max(c->vIn, samples));
             }
 
-            for (size_t offset=0; offset<samples; ++offset)
+            for (size_t offset=0; offset<samples; )
             {
                 size_t to_do            = lsp_min(samples - offset, BUFFER_SIZE);
 
@@ -350,31 +371,28 @@ namespace lsp
                     // Apply the flanging effect
                     for (size_t i=0; i<to_do; ++i)
                     {
-                        l->sRing.append(l->vIn[i]);
-                        r->sRing.append(r->vIn[i]);
+                        float l_sample          = l->vIn[i];
+                        float r_sample          = r->vIn[i];
 
-                        float l_phase           = uint32_t(l->nInitPhase + nPhase) * PHASE_COEFF;
-                        float r_phase           = uint32_t(r->nInitPhase + nPhase) * PHASE_COEFF;
+                        l->sRing.append(l_sample);
+                        r->sRing.append(r_sample);
+
+                        float l_phase           = uint32_t(nPhase + l->nPhaseShift) * PHASE_COEFF;
+                        float r_phase           = uint32_t(nPhase + r->nPhaseShift) * PHASE_COEFF;
 
                         size_t l_shift          = nDepthMin + pLfoFunc(l_phase) * nDepth;
                         size_t r_shift          = nDepthMin + pLfoFunc(r_phase) * nDepth;
 
-                        float l_sample          = l->sRing.get(l_shift);
-                        float r_sample          = r->sRing.get(r_shift);
+                        float l_dsample         = l->sRing.get(l_shift);
+                        float r_dsample         = r->sRing.get(r_shift);
 
-                        l->vBuffer[i]           = (l_sample + l->fFeedback * fFeedGain) * fAmount;
-                        r->vBuffer[i]           = (r_sample + r->fFeedback * fFeedGain) * fAmount;
-                        l->fFeedback            = l_sample;
-                        r->fFeedback            = r_sample;
+                        l->vBuffer[i]           = l_sample + (l_dsample + l->fFeedback * fFeedGain) * fAmount;
+                        r->vBuffer[i]           = r_sample + (r_dsample + r->fFeedback * fFeedGain) * fAmount;
+                        l->fFeedback            = l_dsample;
+                        r->fFeedback            = r_dsample;
 
                         nPhase                 += nPhaseStep;
                     }
-
-                    // Move buffers forward
-                    l->vIn[0]              += to_do;
-                    r->vIn[1]              += to_do;
-                    l->vOut[0]             += to_do;
-                    r->vOut[1]             += to_do;
                 }
                 else
                 {
@@ -383,23 +401,35 @@ namespace lsp
                     // Apply the flanging effect
                     for (size_t i=0; i<to_do; ++i)
                     {
-                        c->sRing.append(c->vIn[i]);
+                        float c_sample          = c->vIn[i];
 
-                        float c_phase           = uint32_t(c->nInitPhase + nPhase) * PHASE_COEFF;
+                        c->sRing.append(c_sample);
+
+                        float c_phase           = uint32_t(nPhase + c->nPhaseShift) * PHASE_COEFF;
 
                         size_t c_shift          = nDepthMin + pLfoFunc(c_phase) * nDepth;
 
-                        float sample            = c->sRing.get(c_shift);
-                        c->vBuffer[i]           = (sample + c->fFeedback * fFeedGain) * fAmount;
-                        c->fFeedback            = sample;
+                        float c_dsample         = c->sRing.get(c_shift);
+                        c->vBuffer[i]           = c_sample + (c_dsample + c->fFeedback * fFeedGain) * fAmount;
+                        c->fFeedback            = c_dsample;
 
                         nPhase                 += nPhaseStep;
                     }
-
-                    // Move buffers forward
-                    c->vIn[0]              += to_do;
-                    c->vOut[0]             += to_do;
                 }
+
+                // Post-process flanger data
+                for (size_t i=0; i<nChannels; ++i)
+                {
+                    channel_t *c            = &vChannels[i];
+
+                    c->pOutLevel->set_value(dsp::abs_max(c->vBuffer, to_do));
+                    c->sBypass.process(c->vOut, c->vIn, c->vBuffer, to_do);
+
+                    c->vIn                 += to_do;
+                    c->vOut                += to_do;
+                }
+
+                offset                 += to_do;
             }
         }
 

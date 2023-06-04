@@ -1,0 +1,15 @@
+{
+	"flanger": {
+		"osc": {
+			"cubic": "Cubic",
+			"logarithmic": "Logarithmic",
+			"parabolic": "Parabolic",
+			"reverse_logarithmic": "Reverse Logarithmic",
+			"reverse_parabolic": "Reverse Parabolic",
+			"reverse_square_root": "Reverse Square Root",
+			"sine": "Sine",
+			"square_root": "Square Root",
+			"triangular": "Triangular"
+		}
+	}
+}

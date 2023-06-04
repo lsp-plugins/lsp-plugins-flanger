@@ -25,6 +25,7 @@
 #include <lsp-plug.in/dsp-units/util/Delay.h>
 #include <lsp-plug.in/dsp-units/util/RingBuffer.h>
 #include <lsp-plug.in/dsp-units/ctl/Bypass.h>
+#include <lsp-plug.in/dsp-units/ctl/Toggle.h>
 #include <lsp-plug.in/plug-fw/plug.h>
 #include <private/meta/flanger.h>
 
@@ -49,7 +50,7 @@ namespace lsp
                     dspu::RingBuffer    sRing;              // Ring buffer for flanger effect processing
 
                     // Parameters
-                    uint32_t            nInitPhase;         // Initial phase value
+                    uint32_t            nPhaseShift;        // Phase shift
                     float               fFeedback;          // Feedback sample
                     float              *vBuffer;            // Processed signal
                     float              *vIn;                // Input buffer
@@ -70,12 +71,15 @@ namespace lsp
                 static lfo_func_t   all_lfo_functions[];
 
             protected:
+                dspu::Toggle        sReset;             // Reset toggle
+
                 size_t              nChannels;          // Number of channels
                 channel_t          *vChannels;          // Delay channels
                 float              *vBuffer;            // Temporary buffer for audio processing
 
                 size_t              nDepthMin;          // Minimum depth value in samples
                 size_t              nDepth;             // Depth value in samples
+                uint32_t            nInitPhase;         // Initial phase
                 uint32_t            nPhase;             // Current phase value
                 uint32_t            nPhaseStep;         // Phase increment
                 lfo_func_t          pLfoFunc;           // LFO function
@@ -85,12 +89,15 @@ namespace lsp
                 float               fWetGain;           // Wet gain (processed signal)
 
                 plug::IPort        *pBypass;            // Bypass
-                plug::IPort        *pDepthMin;          // Minimal depth
-                plug::IPort        *pDepth;             // Depth
                 plug::IPort        *pRate;              // Rate
                 plug::IPort        *pFunc;              // Oscillator function
-                plug::IPort        *pAmount;            // Amount
                 plug::IPort        *pInitPhase;         // Initial Phase
+                plug::IPort        *pPhaseDiff;         // Phase difference between left and right
+                plug::IPort        *pReset;             // Reset phase to default
+
+                plug::IPort        *pDepthMin;          // Minimal depth
+                plug::IPort        *pDepth;             // Depth
+                plug::IPort        *pAmount;            // Amount
                 plug::IPort        *pFeedGain;          // Feedback gain
                 plug::IPort        *pFeedPhase;         // Feedback phase
                 plug::IPort        *pDry;               // Dry gain

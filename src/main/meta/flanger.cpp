@@ -52,33 +52,26 @@ namespace lsp
             { NULL, NULL }
         };
 
-//        static float        lfo_triangular(float phase);
-//        static float        lfo_sine(float phase);
-//        static float        lfo_cubic(float phase);
-//        static float        lfo_parabolic(float phase);
-//        static float        lfo_rev_parabolic(float phase);
-//        static float        lfo_logarithmic(float phase);
-//        static float        lfo_rev_logarithmic(float phase);
-//        static float        lfo_sqrt(float phase);
-//        static float        lfo_rev_sqrt(float phase);
-
         //-------------------------------------------------------------------------
         // Plugin metadata
-
         static const port_t flanger_mono_ports[] =
         {
             // Input and output audio ports
             PORTS_MONO_PLUGIN,
 
             BYPASS,
+
+            CONTROL("rate", "Rate", U_HZ, flanger::RATE),
+            COMBO("type", "Oscillator type", 0, oscillator_functions),
+            CYC_CONTROL("iphase", "Initial Phase", U_DEG, flanger::PHASE),
+            TRIGGER("reset", "Reset phase to initial"),
+
             CONTROL("dmin", "Min Depth", U_MSEC, flanger::DEPTH_MIN),
             CONTROL("depth", "Depth", U_MSEC, flanger::DEPTH),
-            CONTROL("rate", "Rate", U_HZ, flanger::RATE),
-            COMBO("func", "Oscillator function", 0, oscillator_functions),
-            AMP_GAIN10("amount", "The overall amount of the effect", 0.5f),
-            CYC_CONTROL("iphase", "Initial Phase", U_DEG, flanger::PHASE),
+            AMP_GAIN10("amount", "The overall amount of the effect", GAIN_AMP_M_6_DB),
             AMP_GAIN1("fgain", "Feedback Gain", 0.0f),
             SWITCH("fphase", "Feedback Phase Switch", 0.0f),
+
             DRY_GAIN(0.0f),
             WET_GAIN(1.0f),
             OUT_GAIN,
@@ -94,14 +87,19 @@ namespace lsp
             PORTS_STEREO_PLUGIN,
 
             BYPASS,
+
+            CONTROL("rate", "Rate", U_HZ, flanger::RATE),
+            COMBO("type", "Oscillator type", 0, oscillator_functions),
+            CYC_CONTROL("iphase", "Initial Phase", U_DEG, flanger::PHASE),
+            CYC_CONTROL("dphase", "Phase difference between left and right", U_DEG, flanger::PHASE),
+            TRIGGER("reset", "Reset phase to initial"),
+
             CONTROL("dmin", "Min Depth", U_MSEC, flanger::DEPTH_MIN),
             CONTROL("depth", "Depth", U_MSEC, flanger::DEPTH),
-            CONTROL("rate", "Rate", U_HZ, flanger::RATE),
-            COMBO("func", "Oscillator function", 0, oscillator_functions),
-            AMP_GAIN10("amount", "The overall amount of the effect", 0.5f),
-            CYC_CONTROL("iphase", "Initial Phase", U_DEG, flanger::PHASE),
+            AMP_GAIN10("amount", "The overall amount of the effect", GAIN_AMP_M_6_DB),
             AMP_GAIN1("fgain", "Feedback Gain", 0.0f),
             SWITCH("fphase", "Feedback Phase Switch", 0.0f),
+
             DRY_GAIN(0.0f),
             WET_GAIN(1.0f),
             OUT_GAIN,
