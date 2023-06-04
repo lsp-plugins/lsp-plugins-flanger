@@ -178,6 +178,9 @@ namespace lsp
 
                 c->pIn                  = NULL;
                 c->pOut                 = NULL;
+
+                c->pPhase               = NULL;
+                c->pLfoShift            = NULL;
                 c->pInLevel             = NULL;
                 c->pOutLevel            = NULL;
             }
@@ -223,10 +226,12 @@ namespace lsp
 
 
             // Bind output meters
-            lsp_trace("Binding output meters");
+            lsp_trace("Binding channel ports");
             for (size_t i=0; i<nChannels; ++i)
             {
                 channel_t *c            = &vChannels[i];
+                c->pPhase               = TRACE_PORT(ports[port_id++]);
+                c->pLfoShift            = TRACE_PORT(ports[port_id++]);
                 c->pInLevel             = TRACE_PORT(ports[port_id++]);
                 c->pOutLevel            = TRACE_PORT(ports[port_id++]);
             }
@@ -271,6 +276,11 @@ namespace lsp
             }
         }
 
+        inline uint32_t flanger::phase_to_int(float phase)
+        {
+            return double(0x100000000LL) * (phase / 360.0f);
+        }
+
         void flanger::update_settings()
         {
             float out_gain          = pOutGain->value();
@@ -284,7 +294,7 @@ namespace lsp
             nDepthMin               = dspu::millis_to_samples(fSampleRate, pDepthMin->value());
             nDepth                  = dspu::millis_to_samples(fSampleRate, pDepth->value());
             nPhaseStep              = double(0x100000000LL) * rate;
-            nInitPhase              = uint32_t(nPhaseStep * double(pInitPhase->value() / 360.0f));
+            nInitPhase              = phase_to_int(pInitPhase->value());
             fFeedGain               = (pFeedPhase->value() >= 0.5f) ? -feed_gain : feed_gain;
             fDryGain                = pDry->value() * out_gain;
             fWetGain                = pWet->value() * out_gain;
@@ -312,7 +322,7 @@ namespace lsp
                 channel_t *c            = &vChannels[i];
 
                 // Store the parameters for each processor
-                c->nPhaseShift          = (i > 0) ? nPhaseStep * (pPhaseDiff->value() / 360.0f) : 0;
+                c->nPhaseShift          = (i > 0) ? phase_to_int(pPhaseDiff->value()) : 0;
 
                 // Update processors
                 c->sBypass.set_bypass(bypass);
@@ -424,6 +434,11 @@ namespace lsp
                 1.0f - sqrtf(0.25f - 4.0f * phase * phase);
         }
 
+        inline float flanger::calc_phase(uint32_t phase)
+        {
+            return uint32_t(nPhase + phase) * PHASE_COEFF;
+        }
+
         void flanger::process(size_t samples)
         {
             // Reset phase if phase request is pending
@@ -462,8 +477,8 @@ namespace lsp
                         l->sRing.append(l_sample);
                         r->sRing.append(r_sample);
 
-                        float l_phase           = uint32_t(nPhase + l->nPhaseShift) * PHASE_COEFF;
-                        float r_phase           = uint32_t(nPhase + r->nPhaseShift) * PHASE_COEFF;
+                        float l_phase           = calc_phase(l->nPhaseShift);
+                        float r_phase           = calc_phase(r->nPhaseShift);
 
                         size_t l_shift          = nDepthMin + pLfoFunc(l_phase) * nDepth;
                         size_t r_shift          = nDepthMin + pLfoFunc(r_phase) * nDepth;
@@ -490,7 +505,7 @@ namespace lsp
 
                         c->sRing.append(c_sample);
 
-                        float c_phase           = uint32_t(nPhase + c->nPhaseShift) * PHASE_COEFF;
+                        float c_phase           = calc_phase(c->nPhaseShift);
 
                         size_t c_shift          = nDepthMin + pLfoFunc(c_phase) * nDepth;
 
@@ -515,6 +530,16 @@ namespace lsp
                 }
 
                 offset                 += to_do;
+            }
+
+            // Output information about phase for each channel
+            for (size_t i=0; i<nChannels; ++i)
+            {
+                channel_t *c            = &vChannels[i];
+                float phase             = calc_phase(c->nPhaseShift);
+
+                c->pPhase->set_value(phase * 360.0f);
+                c->pLfoShift->set_value(pLfoFunc(phase));
             }
 
             // Need to synchronize LFO mesh?

@@ -61,6 +61,8 @@ namespace lsp
                     plug::IPort        *pOut;               // Output port
 
                     // Output ports
+                    plug::IPort        *pPhase;             // Current phase
+                    plug::IPort        *pLfoShift;          // LFO shift
                     plug::IPort        *pInLevel;           // Input signal level
                     plug::IPort        *pOutLevel;          // Output signal level
                 } channel_t;
@@ -125,6 +127,11 @@ namespace lsp
                 static float        lfo_rev_sqrt(float phase);
                 static float        lfo_circular(float phase);
                 static float        lfo_rev_circular(float phase);
+
+                static inline uint32_t  phase_to_int(float phase);
+
+            protected:
+                inline float        calc_phase(uint32_t phase);
 
             public:
                 explicit flanger(const meta::plugin_t *meta);

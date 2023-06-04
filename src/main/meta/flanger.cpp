@@ -67,19 +67,22 @@ namespace lsp
 
             CONTROL("rate", "Rate", U_HZ, flanger::RATE),
             COMBO("type", "Oscillator type", 0, oscillator_functions),
-            CYC_CONTROL("iphase", "Initial Phase", U_DEG, flanger::PHASE),
+            CYC_CONTROL("iphase", "Initial phase", U_DEG, flanger::PHASE),
             TRIGGER("reset", "Reset phase to initial"),
             MESH("lfo", "LFO graph", 2, flanger::LFO_MESH_SIZE),
 
-            CONTROL("dmin", "Min Depth", U_MSEC, flanger::DEPTH_MIN),
+            CONTROL("dmin", "Min depth", U_MSEC, flanger::DEPTH_MIN),
             CONTROL("depth", "Depth", U_MSEC, flanger::DEPTH),
             AMP_GAIN10("amount", "The overall amount of the effect", GAIN_AMP_M_6_DB),
-            AMP_GAIN1("fgain", "Feedback Gain", 0.0f),
-            SWITCH("fphase", "Feedback Phase Switch", 0.0f),
+            AMP_GAIN1("fgain", "Feedback gain", 0.0f),
+            SWITCH("fphase", "Feedback phase switch", 0.0f),
 
             DRY_GAIN(0.0f),
             WET_GAIN(1.0f),
             OUT_GAIN,
+
+            METER("clph", "Current LFO phase", U_DEG, flanger::PHASE),
+            METER("clsh", "Current LFO shift", U_NONE, flanger::SHIFT),
 
             METER_GAIN("min", "Input gain", GAIN_AMP_P_48_DB),
             METER_GAIN("mout", "Output gain", GAIN_AMP_P_48_DB),
@@ -95,23 +98,28 @@ namespace lsp
 
             CONTROL("rate", "Rate", U_HZ, flanger::RATE),
             COMBO("type", "Oscillator type", 0, oscillator_functions),
-            CYC_CONTROL("iphase", "Initial Phase", U_DEG, flanger::PHASE),
+            CYC_CONTROL("iphase", "Initial phase", U_DEG, flanger::PHASE),
             CYC_CONTROL("dphase", "Phase difference between left and right", U_DEG, flanger::PHASE),
             TRIGGER("reset", "Reset phase to initial"),
             MESH("lfo", "LFO graph", 2, flanger::LFO_MESH_SIZE),
 
-            CONTROL("dmin", "Min Depth", U_MSEC, flanger::DEPTH_MIN),
+            CONTROL("dmin", "Min depth", U_MSEC, flanger::DEPTH_MIN),
             CONTROL("depth", "Depth", U_MSEC, flanger::DEPTH),
             AMP_GAIN10("amount", "The overall amount of the effect", GAIN_AMP_M_6_DB),
-            AMP_GAIN1("fgain", "Feedback Gain", 0.0f),
-            SWITCH("fphase", "Feedback Phase Switch", 0.0f),
+            AMP_GAIN1("fgain", "Feedback gain", 0.0f),
+            SWITCH("fphase", "Feedback phase switch", 0.0f),
 
             DRY_GAIN(0.0f),
             WET_GAIN(1.0f),
             OUT_GAIN,
 
+            METER("clph_l", "Current LFO phase left", U_DEG, flanger::PHASE),
+            METER("clsh_l", "Current LFO shift left", U_NONE, flanger::SHIFT),
             METER_GAIN("min_l", "Input gain left",  GAIN_AMP_P_48_DB),
             METER_GAIN("mout_l", "Output gain left",  GAIN_AMP_P_48_DB),
+
+            METER("clph_r", "Current LFO phase right", U_DEG, flanger::PHASE),
+            METER("clsh_r", "Current LFO shift right", U_NONE, flanger::SHIFT),
             METER_GAIN("min_r", "Input gain right",  GAIN_AMP_P_48_DB),
             METER_GAIN("mout_r", "Output gain right", GAIN_AMP_P_48_DB),
 

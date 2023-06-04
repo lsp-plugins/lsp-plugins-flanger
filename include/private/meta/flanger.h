@@ -43,6 +43,11 @@ namespace lsp
             static constexpr float  DEPTH_DFL           = 5.0f;
             static constexpr float  DEPTH_STEP          = 0.05f;
 
+            static constexpr float  SHIFT_MIN           = 0.0f;
+            static constexpr float  SHIFT_MAX           = 1.0f;
+            static constexpr float  SHIFT_DFL           = 0.0f;
+            static constexpr float  SHIFT_STEP          = 0.01f;
+
             static constexpr float  PHASE_MIN           = 0.0f;
             static constexpr float  PHASE_MAX           = 360.0f;
             static constexpr float  PHASE_DFL           = 0.0f;

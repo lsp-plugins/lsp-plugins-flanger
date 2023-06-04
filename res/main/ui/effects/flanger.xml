@@ -89,6 +89,19 @@
 				
 				<!-- Mesh -->
 				<mesh id="lfo" width="3" color="graph_mesh" smooth="true"/>
+				
+				<!-- Dot -->
+				<ui:if test="!(ex :in_r)">
+					<marker v=":clsh" ox="1" oy="0" color="graph_mesh" />
+					<dot x.id="clph" y.id="clsh" color="graph_mesh" bcolor="graph_mesh"/>
+				</ui:if>
+				<ui:if test="ex :in_r">
+					<marker v=":clsh_l" ox="1" oy="0" color="left" />
+					<marker v=":clsh_r" ox="1" oy="0" color="right" />
+					
+					<dot x.id="clph_l" y.id="clsh_l" color="left" bcolor="left"/>
+					<dot x.id="clph_r" y.id="clsh_r" color="right" bcolor="right"/>
+				</ui:if>
 			</graph>
 		</cell>
 		
