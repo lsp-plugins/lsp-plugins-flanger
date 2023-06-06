@@ -50,6 +50,7 @@ namespace lsp
                     dspu::RingBuffer    sFeedback;          // Feedback delay buffer
 
                     // Parameters
+                    uint32_t            nOldPhaseShift;     // Old phase shift
                     uint32_t            nPhaseShift;        // Phase shift
                     float              *vBuffer;            // Processed signal
                     float              *vIn;                // Input buffer
@@ -141,9 +142,6 @@ namespace lsp
                 static inline uint32_t  phase_to_int(float phase);
                 static inline float     lerp(float o_value, float n_value, float k);
                 static inline int32_t   ilerp(int32_t o_value, int32_t n_value, float k);
-
-            protected:
-                inline float        calc_phase(uint32_t phase);
 
             public:
                 explicit flanger(const meta::plugin_t *meta);
