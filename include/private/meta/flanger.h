@@ -40,7 +40,7 @@ namespace lsp
 
             static constexpr float  DEPTH_MIN           = 1.0f;
             static constexpr float  DEPTH_MAX           = 20.0f;
-            static constexpr float  DEPTH_DFL           = 5.0f;
+            static constexpr float  DEPTH_DFL           = 2.0f;
             static constexpr float  DEPTH_STEP          = 0.05f;
 
             static constexpr float  SHIFT_MIN           = 0.0f;
@@ -57,6 +57,11 @@ namespace lsp
             static constexpr float  RATE_MAX            = 20.0f;
             static constexpr float  RATE_DFL            = 0.25f;
             static constexpr float  RATE_STEP           = 0.01f;
+
+            static constexpr float  FEEDBACK_DELAY_MIN  = 0.0f;
+            static constexpr float  FEEDBACK_DELAY_MAX  = 5.0f;
+            static constexpr float  FEEDBACK_DELAY_DFL  = 0.0f;
+            static constexpr float  FEEDBACK_DELAY_STEP = 0.01f;
 
             static constexpr size_t LFO_MESH_SIZE       = 361;
 

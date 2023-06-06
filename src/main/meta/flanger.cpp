@@ -71,10 +71,12 @@ namespace lsp
             TRIGGER("reset", "Reset phase to initial"),
             MESH("lfo", "LFO graph", 2, flanger::LFO_MESH_SIZE),
 
-            CONTROL("dmin", "Min depth", U_MSEC, flanger::DEPTH_MIN),
-            CONTROL("depth", "Depth", U_MSEC, flanger::DEPTH),
+            LOG_CONTROL("dmin", "Min depth", U_MSEC, flanger::DEPTH_MIN),
+            LOG_CONTROL("depth", "Depth", U_MSEC, flanger::DEPTH),
+            SWITCH("sphase", "Signal phase switch", 0.0f),
             AMP_GAIN10("amount", "The overall amount of the effect", GAIN_AMP_M_6_DB),
             AMP_GAIN1("fgain", "Feedback gain", 0.0f),
+            LOG_CONTROL("fdelay", "Feedback delay", U_MSEC, flanger::FEEDBACK_DELAY),
             SWITCH("fphase", "Feedback phase switch", 0.0f),
 
             DRY_GAIN(0.0f),
@@ -103,10 +105,12 @@ namespace lsp
             TRIGGER("reset", "Reset phase to initial"),
             MESH("lfo", "LFO graph", 2, flanger::LFO_MESH_SIZE),
 
-            CONTROL("dmin", "Min depth", U_MSEC, flanger::DEPTH_MIN),
-            CONTROL("depth", "Depth", U_MSEC, flanger::DEPTH),
+            LOG_CONTROL("dmin", "Min depth", U_MSEC, flanger::DEPTH_MIN),
+            LOG_CONTROL("depth", "Depth", U_MSEC, flanger::DEPTH),
+            SWITCH("sphase", "Signal phase switch", 0.0f),
             AMP_GAIN10("amount", "The overall amount of the effect", GAIN_AMP_M_6_DB),
             AMP_GAIN1("fgain", "Feedback gain", 0.0f),
+            LOG_CONTROL("fdelay", "Feedback delay", U_MSEC, flanger::FEEDBACK_DELAY),
             SWITCH("fphase", "Feedback phase switch", 0.0f),
 
             DRY_GAIN(0.0f),

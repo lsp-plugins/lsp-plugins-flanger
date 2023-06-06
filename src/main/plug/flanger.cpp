@@ -28,10 +28,9 @@
 #include <private/plugins/flanger.h>
 
 /* The size of temporary buffer for audio processing */
-#define BUFFER_SIZE         0x1000U
-
-static constexpr float PHASE_COEFF          = 1.0f / float(0x100000000LL);
-static constexpr float REV_LN100             = 0.5f / M_LN10;
+static constexpr size_t BUFFER_SIZE             = 512;
+static constexpr float  PHASE_COEFF             = 1.0f / float(0x100000000LL);
+static constexpr float  REV_LN100               = 0.5f / M_LN10;
 
 namespace lsp
 {
@@ -101,6 +100,7 @@ namespace lsp
             pLfoFunc        = lfo_triangular;
             fAmount         = 0.0f;
             fFeedGain       = 0.0f;
+            nFeedDelay      = 0;
             fDryGain        = 0.0f;
             fWetGain        = 0.0f;
             bSyncLfo        = true;
@@ -115,8 +115,10 @@ namespace lsp
 
             pDepthMin       = NULL;
             pDepth          = NULL;
+            pSignalPhase    = NULL;
             pAmount         = NULL;
             pFeedGain       = NULL;
+            pFeedDelay      = NULL;
             pFeedPhase      = NULL;
             pDry            = NULL;
             pWet            = NULL;
@@ -168,9 +170,9 @@ namespace lsp
                 // Construct in-place DSP processors
                 c->sBypass.construct();
                 c->sRing.construct();
+                c->sFeedback.construct();
 
                 c->nPhaseShift          = 0;
-                c->fFeedback            = 0.0f;
                 c->vBuffer              = reinterpret_cast<float *>(ptr);
                 ptr                    += buf_sz;
                 c->vIn                  = NULL;
@@ -210,8 +212,10 @@ namespace lsp
 
             pDepthMin           = TRACE_PORT(ports[port_id++]);
             pDepth              = TRACE_PORT(ports[port_id++]);
+            pSignalPhase        = TRACE_PORT(ports[port_id++]);
             pAmount             = TRACE_PORT(ports[port_id++]);
             pFeedGain           = TRACE_PORT(ports[port_id++]);
+            pFeedDelay          = TRACE_PORT(ports[port_id++]);
             pFeedPhase          = TRACE_PORT(ports[port_id++]);
             pDry                = TRACE_PORT(ports[port_id++]);
             pWet                = TRACE_PORT(ports[port_id++]);
@@ -249,6 +253,7 @@ namespace lsp
                     channel_t *c    = &vChannels[i];
                     c->sBypass.destroy();
                     c->sRing.destroy();
+                    c->sFeedback.destroy();
                 }
                 vChannels   = NULL;
             }
@@ -267,11 +272,13 @@ namespace lsp
         {
             // Update sample rate for the bypass processors
             size_t max_delay = dspu::millis_to_samples(sr, meta::flanger::DEPTH_MIN_MAX + meta::flanger::DEPTH_MAX);
+            size_t max_feedback = max_delay + dspu::millis_to_samples(sr, meta::flanger::FEEDBACK_DELAY_MAX);
 
             for (size_t i=0; i<nChannels; ++i)
             {
                 channel_t *c    = &vChannels[i];
                 c->sRing.init(max_delay + BUFFER_SIZE);
+                c->sFeedback.init(max_feedback + BUFFER_SIZE);
                 c->sBypass.init(sr);
             }
         }
@@ -287,6 +294,7 @@ namespace lsp
             bool bypass             = pBypass->value() >= 0.5f;
             float rate              = pRate->value() / fSampleRate;
             float feed_gain         = pFeedGain->value();
+            float amount_gain       = pAmount->value();
             size_t lfo_type         = size_t(pLfoType->value());
 
             sReset.submit(pReset->value());
@@ -295,10 +303,11 @@ namespace lsp
             nDepth                  = dspu::millis_to_samples(fSampleRate, pDepth->value());
             nPhaseStep              = double(0x100000000LL) * rate;
             nInitPhase              = phase_to_int(pInitPhase->value());
+            nFeedDelay              = dspu::millis_to_samples(fSampleRate, pFeedDelay->value());
             fFeedGain               = (pFeedPhase->value() >= 0.5f) ? -feed_gain : feed_gain;
             fDryGain                = pDry->value() * out_gain;
             fWetGain                = pWet->value() * out_gain;
-            fAmount                 = pAmount->value();
+            fAmount                 = (pSignalPhase->value() >= 0.5f) ? -amount_gain : amount_gain;
 
             // Update the LFO information
             if (lfo_type != nLfoType)
@@ -471,25 +480,27 @@ namespace lsp
                     // Apply the flanging effect
                     for (size_t i=0; i<to_do; ++i)
                     {
+                        float l_phase           = calc_phase(l->nPhaseShift);
+                        float r_phase           = calc_phase(r->nPhaseShift);
+                        size_t l_shift          = nDepthMin + pLfoFunc(l_phase) * nDepth;
+                        size_t r_shift          = nDepthMin + pLfoFunc(r_phase) * nDepth;
+
                         float l_sample          = l->vIn[i];
                         float r_sample          = r->vIn[i];
 
                         l->sRing.append(l_sample);
                         r->sRing.append(r_sample);
 
-                        float l_phase           = calc_phase(l->nPhaseShift);
-                        float r_phase           = calc_phase(r->nPhaseShift);
-
-                        size_t l_shift          = nDepthMin + pLfoFunc(l_phase) * nDepth;
-                        size_t r_shift          = nDepthMin + pLfoFunc(r_phase) * nDepth;
-
                         float l_dsample         = l->sRing.get(l_shift);
                         float r_dsample         = r->sRing.get(r_shift);
+                        float l_fbsample        = l->sFeedback.get(nFeedDelay + l_shift);
+                        float r_fbsample        = r->sFeedback.get(nFeedDelay + r_shift);
 
-                        l->vBuffer[i]           = l_sample + (l_dsample + l->fFeedback * fFeedGain) * fAmount;
-                        r->vBuffer[i]           = r_sample + (r_dsample + r->fFeedback * fFeedGain) * fAmount;
-                        l->fFeedback            = l_dsample;
-                        r->fFeedback            = r_dsample;
+                        l->vBuffer[i]           = l_sample + (l_dsample + l_fbsample * fFeedGain) * fAmount;
+                        r->vBuffer[i]           = r_sample + (r_dsample + r_fbsample * fFeedGain) * fAmount;
+
+                        l->sFeedback.append((l_dsample + l_fbsample * fFeedGain));
+                        r->sFeedback.append(r_dsample + r_fbsample * fFeedGain);
 
                         nPhase                 += nPhaseStep;
                     }
@@ -501,17 +512,19 @@ namespace lsp
                     // Apply the flanging effect
                     for (size_t i=0; i<to_do; ++i)
                     {
+                        float c_phase           = calc_phase(c->nPhaseShift);
+                        size_t c_shift          = nDepthMin + pLfoFunc(c_phase) * nDepth;
+
                         float c_sample          = c->vIn[i];
 
                         c->sRing.append(c_sample);
 
-                        float c_phase           = calc_phase(c->nPhaseShift);
-
-                        size_t c_shift          = nDepthMin + pLfoFunc(c_phase) * nDepth;
-
                         float c_dsample         = c->sRing.get(c_shift);
-                        c->vBuffer[i]           = c_sample + (c_dsample + c->fFeedback * fFeedGain) * fAmount;
-                        c->fFeedback            = c_dsample;
+                        float c_fbsample        = c->sFeedback.get(nFeedDelay);
+
+                        c->vBuffer[i]           = c_sample + (c_dsample + c_fbsample * fFeedGain) * fAmount;
+
+                        c->sFeedback.append(c_dsample);
 
                         nPhase                 += nPhaseStep;
                     }

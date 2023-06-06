@@ -22,7 +22,6 @@
 #ifndef PRIVATE_PLUGINS_FLANGER_H_
 #define PRIVATE_PLUGINS_FLANGER_H_
 
-#include <lsp-plug.in/dsp-units/util/Delay.h>
 #include <lsp-plug.in/dsp-units/util/RingBuffer.h>
 #include <lsp-plug.in/dsp-units/ctl/Bypass.h>
 #include <lsp-plug.in/dsp-units/ctl/Toggle.h>
@@ -48,10 +47,10 @@ namespace lsp
                     // DSP processing modules
                     dspu::Bypass        sBypass;            // Bypass
                     dspu::RingBuffer    sRing;              // Ring buffer for flanger effect processing
+                    dspu::RingBuffer    sFeedback;          // Feedback delay buffer
 
                     // Parameters
                     uint32_t            nPhaseShift;        // Phase shift
-                    float               fFeedback;          // Feedback sample
                     float              *vBuffer;            // Processed signal
                     float              *vIn;                // Input buffer
                     float              *vOut;               // Output buffer
@@ -90,6 +89,7 @@ namespace lsp
                 lfo_func_t          pLfoFunc;           // LFO function
                 float               fAmount;            // The overall amount
                 float               fFeedGain;          // Feed-back gain
+                size_t              nFeedDelay;         // Feed-back delay
                 float               fDryGain;           // Dry gain (unprocessed signal)
                 float               fWetGain;           // Wet gain (processed signal)
                 bool                bSyncLfo;           // Synchronize LFO graph
@@ -104,8 +104,10 @@ namespace lsp
 
                 plug::IPort        *pDepthMin;          // Minimal depth
                 plug::IPort        *pDepth;             // Depth
+                plug::IPort        *pSignalPhase;       // Signal phase
                 plug::IPort        *pAmount;            // Amount
                 plug::IPort        *pFeedGain;          // Feedback gain
+                plug::IPort        *pFeedDelay;         // Feedback delay
                 plug::IPort        *pFeedPhase;         // Feedback phase
                 plug::IPort        *pDry;               // Dry gain
                 plug::IPort        *pWet;               // Wet gain

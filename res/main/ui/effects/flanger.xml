@@ -108,23 +108,29 @@
 		<!-- Row 3: effect settings -->
 		<cell cols="2">
 			<group text="labels.controls">
-				<grid rows="3" cols="5">
+				<grid rows="3" cols="7">
 					<label text="labels.depth.min" />
 					<label text="labels.depth" />
+					<label text="labels.signal.phase" />
 					<label text="labels.amount" />
 					<label text="labels.feedback" />
+					<label text="labels.delay" />
 					<label text="labels.signal.phase" />
 					
 					<knob id="dmin" />
 					<knob id="depth" />
+					<button id="sphase" size="32" />
 					<knob id="amount" />
 					<knob id="fgain" />
+					<knob id="fdelay" />
 					<button id="fphase" size="32" />
 					
 					<value id="dmin" />
 					<value id="depth" />
+					<void />
 					<value id="amount" />
 					<value id="fgain" />
+					<value id="fdelay" />
 					<void />
 				</grid>
 			</group>
