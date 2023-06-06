@@ -80,17 +80,25 @@ namespace lsp
                 float              *vLfoPhase;          // LFO mesh phase data
                 float              *vLfoMesh;           // LFO mesh amplitude data
 
-                size_t              nDepthMin;          // Minimum depth value in samples
-                size_t              nDepth;             // Depth value in samples
+                uint32_t            nOldDepthMin;       // Old minimum depth
+                uint32_t            nDepthMin;          // Minimum depth value in samples
+                uint32_t            nOldDepth;          // Old depth value in samples
+                uint32_t            nDepth;             // Depth value in samples
                 uint32_t            nInitPhase;         // Initial phase
                 uint32_t            nPhase;             // Current phase value
+                uint32_t            nOldPhaseStep;      // Old phase increment
                 uint32_t            nPhaseStep;         // Phase increment
                 size_t              nLfoType;           // Type of LFO
                 lfo_func_t          pLfoFunc;           // LFO function
+                float               fOldAmount;         // Old overal amount
                 float               fAmount;            // The overall amount
+                float               fOldFeedGain;       // Old feedback gain
                 float               fFeedGain;          // Feed-back gain
+                size_t              nOldFeedDelay;      // Old feedback delay
                 size_t              nFeedDelay;         // Feed-back delay
+                float               fOldDryGain;        // Old dry gain
                 float               fDryGain;           // Dry gain (unprocessed signal)
+                float               fOldWetGain;        // Old wet gain
                 float               fWetGain;           // Wet gain (processed signal)
                 bool                bSyncLfo;           // Synchronize LFO graph
 
@@ -131,6 +139,8 @@ namespace lsp
                 static float        lfo_rev_circular(float phase);
 
                 static inline uint32_t  phase_to_int(float phase);
+                static inline float     lerp(float o_value, float n_value, float k);
+                static inline int32_t   ilerp(int32_t o_value, int32_t n_value, float k);
 
             protected:
                 inline float        calc_phase(uint32_t phase);
