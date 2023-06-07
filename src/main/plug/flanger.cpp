@@ -219,10 +219,13 @@ namespace lsp
             fFeedGain       = 0.0f;
             nOldFeedDelay   = 0;
             nFeedDelay      = 0;
+            fOldInGain      = 0.0f;
+            fInGain         = 0.0f;
             fOldDryGain     = 0.0f;
             fDryGain        = 0.0f;
             fOldWetGain     = 0.0f;
             fWetGain        = 0.0f;
+            bMidSide        = false;
 
             pBypass         = NULL;
             pRate           = NULL;
@@ -230,6 +233,7 @@ namespace lsp
             pPhaseDiff      = NULL;
             pReset          = NULL;
 
+            pMsSwitch       = NULL;
             pDepthMin       = NULL;
             pDepth          = NULL;
             pSignalPhase    = NULL;
@@ -237,6 +241,7 @@ namespace lsp
             pFeedGain       = NULL;
             pFeedDelay      = NULL;
             pFeedPhase      = NULL;
+            pInGain         = NULL;
             pDry            = NULL;
             pWet            = NULL;
             pOutGain        = NULL;
@@ -340,6 +345,8 @@ namespace lsp
             if (nChannels > 1)
                 vChannels[1].pLfoMesh   = TRACE_PORT(ports[port_id++]);
 
+            if (nChannels > 1)
+                pMsSwitch           = TRACE_PORT(ports[port_id++]);
             pDepthMin           = TRACE_PORT(ports[port_id++]);
             pDepth              = TRACE_PORT(ports[port_id++]);
             pSignalPhase        = TRACE_PORT(ports[port_id++]);
@@ -347,6 +354,7 @@ namespace lsp
             pFeedGain           = TRACE_PORT(ports[port_id++]);
             pFeedDelay          = TRACE_PORT(ports[port_id++]);
             pFeedPhase          = TRACE_PORT(ports[port_id++]);
+            pInGain             = TRACE_PORT(ports[port_id++]);
             pDry                = TRACE_PORT(ports[port_id++]);
             pWet                = TRACE_PORT(ports[port_id++]);
             pOutGain            = TRACE_PORT(ports[port_id++]);
@@ -417,11 +425,13 @@ namespace lsp
 
         void flanger::update_settings()
         {
+            float in_gain           = pInGain->value();
             float out_gain          = pOutGain->value();
             bool bypass             = pBypass->value() >= 0.5f;
             float rate              = pRate->value() / fSampleRate;
             float feed_gain         = pFeedGain->value();
             float amount_gain       = pAmount->value();
+            bool mid_side           = pMsSwitch->value();
 
             sReset.submit(pReset->value());
 
@@ -436,6 +446,8 @@ namespace lsp
             nFeedDelay              = dspu::millis_to_samples(fSampleRate, pFeedDelay->value());
             fOldFeedGain            = fFeedGain;
             fFeedGain               = (pFeedPhase->value() >= 0.5f) ? -feed_gain : feed_gain;
+            fOldInGain              = fInGain;
+            fInGain                 = in_gain;
             fOldDryGain             = fDryGain;
             fDryGain                = pDry->value() * out_gain;
             fOldWetGain             = fWetGain;
@@ -446,6 +458,7 @@ namespace lsp
             {
                 channel_t *c            = &vChannels[i];
 
+                // Update LFO preferences
                 size_t lfo_type         = size_t(c->pLfoType->value());
                 if (i > 0)
                     lfo_type                = (lfo_type > 0) ? lfo_type - 1 : vChannels[0].nLfoType;
@@ -461,6 +474,13 @@ namespace lsp
                         c->vLfoMesh[i]          = c->pLfoFunc(i * k);
                 }
 
+                // For Mid/Side switch change, clear the buffers
+                if (mid_side != bMidSide)
+                {
+                    c->sRing.clear();
+                    c->sFeedback.clear();
+                }
+
                 // Store the parameters for each processor
                 c->nOldPhaseShift       = c->nPhaseShift;
                 c->nPhaseShift          = (i > 0) ? phase_to_int(pPhaseDiff->value()) : 0;
@@ -468,6 +488,8 @@ namespace lsp
                 // Update processors
                 c->sBypass.set_bypass(bypass);
             }
+
+            bMidSide                = mid_side;
         }
 
         void flanger::process(size_t samples)
@@ -496,6 +518,28 @@ namespace lsp
                 float k_to_do           = 1.0f / float(to_do);
                 uint32_t phase          = nPhase;
 
+                // Convert to Mid/Side if needed
+                if ((bMidSide) && (nChannels > 1))
+                {
+                    dsp::lr_to_ms(
+                        vChannels[0].vBuffer,
+                        vChannels[1].vBuffer,
+                        vChannels[0].vIn,
+                        vChannels[1].vIn,
+                        to_do
+                    );
+
+                    dsp::lramp2(vChannels[0].vBuffer, vChannels[0].vBuffer, fOldInGain, fInGain, to_do);
+                    dsp::lramp2(vChannels[1].vBuffer, vChannels[1].vBuffer, fOldInGain, fInGain, to_do);
+                }
+                else
+                {
+                    dsp::lramp2(vChannels[0].vBuffer, vChannels[0].vIn, fOldInGain, fInGain, to_do);
+                    if (nChannels > 1)
+                        dsp::lramp2(vChannels[1].vBuffer, vChannels[1].vIn, fOldInGain, fInGain, to_do);
+                }
+
+                // Do audio processing
                 for (size_t nc=0; nc<nChannels; ++nc)
                 {
                     channel_t *c            = &vChannels[nc];
@@ -513,7 +557,7 @@ namespace lsp
                             c_shift +
                             ilerp(nOldFeedDelay, nFeedDelay, s);
 
-                        float c_sample          = c->vIn[i];
+                        float c_sample          = c->vBuffer[i];
                         c->sRing.append(c_sample);
 
                         float c_dsample         = c->sRing.get(c_shift);
@@ -529,7 +573,26 @@ namespace lsp
                         phase                  += ilerp(nOldPhaseStep, nPhaseStep, s);
                     }
 
-                    // Apply Dry/Wet and measure output level
+                    // Update channel's phase shift
+                    c->nOldPhaseShift       = c->nPhaseShift;
+                }
+
+                // Convert back to left-right if needed
+                if ((bMidSide) && (nChannels > 1))
+                {
+                    dsp::ms_to_lr(
+                        vChannels[0].vBuffer,
+                        vChannels[1].vBuffer,
+                        vChannels[0].vBuffer,
+                        vChannels[1].vBuffer,
+                        to_do
+                    );
+                }
+
+                // Apply Dry/Wet and measure output level
+                for (size_t nc=0; nc<nChannels; ++nc)
+                {
+                    channel_t *c            = &vChannels[nc];
                     dsp::lramp1(c->vBuffer, fOldWetGain, fWetGain, to_do);
                     dsp::lramp_add2(c->vBuffer, c->vIn, fOldDryGain, fDryGain, to_do);
                     c->pOutLevel->set_value(dsp::abs_max(c->vBuffer, to_do));
@@ -550,10 +613,11 @@ namespace lsp
                 fOldAmount          = fAmount;
                 fOldFeedGain        = fFeedGain;
                 nOldFeedDelay       = nFeedDelay;
+                fOldInGain          = fInGain;
                 fOldDryGain         = fDryGain;
                 fOldWetGain         = fWetGain;
 
-                offset                 += to_do;
+                offset             += to_do;
             }
 
             // Output information about phase for each channel

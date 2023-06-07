@@ -101,10 +101,13 @@ namespace lsp
                 float               fFeedGain;          // Feed-back gain
                 size_t              nOldFeedDelay;      // Old feedback delay
                 size_t              nFeedDelay;         // Feed-back delay
+                float               fOldInGain;         // Old input gain
+                float               fInGain;            // Input gain
                 float               fOldDryGain;        // Old dry gain
                 float               fDryGain;           // Dry gain (unprocessed signal)
                 float               fOldWetGain;        // Old wet gain
                 float               fWetGain;           // Wet gain (processed signal)
+                bool                bMidSide;           // Mid/Side mode
 
                 plug::IPort        *pBypass;            // Bypass
                 plug::IPort        *pRate;              // Rate
@@ -112,6 +115,7 @@ namespace lsp
                 plug::IPort        *pPhaseDiff;         // Phase difference between left and right
                 plug::IPort        *pReset;             // Reset phase to default
 
+                plug::IPort        *pMsSwitch;          // Mid/Side switch
                 plug::IPort        *pDepthMin;          // Minimal depth
                 plug::IPort        *pDepth;             // Depth
                 plug::IPort        *pSignalPhase;       // Signal phase
@@ -119,6 +123,7 @@ namespace lsp
                 plug::IPort        *pFeedGain;          // Feedback gain
                 plug::IPort        *pFeedDelay;         // Feedback delay
                 plug::IPort        *pFeedPhase;         // Feedback phase
+                plug::IPort        *pInGain;            // Input gain
                 plug::IPort        *pDry;               // Dry gain
                 plug::IPort        *pWet;               // Wet gain
                 plug::IPort        *pOutGain;           // Output gain
