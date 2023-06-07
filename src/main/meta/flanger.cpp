@@ -52,6 +52,7 @@ namespace lsp
             { "Reverse Square Root",    "flanger.osc.reverse_square_root"   }, \
             { "Circular",               "flanger.osc.circular"              }, \
             { "Reverse Circular",       "flanger.osc.reverse_circular"      }, \
+            { "Off",                    "flanger.osc.off"                   }, \
             { NULL, NULL }
 
         static const port_item_t oscillator_functions[] =
@@ -65,6 +66,14 @@ namespace lsp
             LFO_LIST
         };
 
+        static const port_item_t oscillator_periods[] =
+        {
+            { "Full",                   "flanger.period.full"               }, \
+            { "First",                  "flanger.period.first"              }, \
+            { "Last",                   "flanger.period.last"               }, \
+            { NULL, NULL }
+        };
+
         //-------------------------------------------------------------------------
         // Plugin metadata
         static const port_t flanger_mono_ports[] =
@@ -75,7 +84,9 @@ namespace lsp
             BYPASS,
 
             CONTROL("rate", "Rate", U_HZ, flanger::RATE),
-            COMBO("type", "Oscillator type", 0, oscillator_functions),
+            CONTROL("xfade", "Crossfade", U_PERCENT, flanger::CROSSFADE),
+            COMBO("type", "LFO type", 0, oscillator_functions),
+            COMBO("period", "LFO period", 0, oscillator_periods),
             CYC_CONTROL("iphase", "Initial phase", U_DEG, flanger::PHASE),
             TRIGGER("reset", "Reset phase to initial"),
             MESH("lfo", "LFO graph", 2, flanger::LFO_MESH_SIZE),
@@ -109,8 +120,11 @@ namespace lsp
             BYPASS,
 
             CONTROL("rate", "Rate", U_HZ, flanger::RATE),
+            CONTROL("xfade", "Crossfade", U_PERCENT, flanger::CROSSFADE),
             COMBO("type", "LFO type", 0, oscillator_functions),
+            COMBO("period", "LFO period", 0, oscillator_periods),
             COMBO("atype", "Additional LFO type", 0, additional_oscillator_functions),
+            COMBO("aperiod", "Additional LFO period", 0, oscillator_periods),
             CYC_CONTROL("iphase", "Initial phase", U_DEG, flanger::PHASE),
             CYC_CONTROL("dphase", "Phase difference between left and right", U_DEG, flanger::PHASE),
             TRIGGER("reset", "Reset phase to initial"),

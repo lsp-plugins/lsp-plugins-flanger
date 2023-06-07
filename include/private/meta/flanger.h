@@ -58,6 +58,11 @@ namespace lsp
             static constexpr float  RATE_DFL            = 0.25f;
             static constexpr float  RATE_STEP           = 0.01f;
 
+            static constexpr float  CROSSFADE_MIN       = 0.0f;
+            static constexpr float  CROSSFADE_MAX       = 50.0f;
+            static constexpr float  CROSSFADE_DFL       = 0.0f;
+            static constexpr float  CROSSFADE_STEP      = 0.1f;
+
             static constexpr float  FEEDBACK_DELAY_MIN  = 0.0f;
             static constexpr float  FEEDBACK_DELAY_MAX  = 5.0f;
             static constexpr float  FEEDBACK_DELAY_DFL  = 0.0f;
@@ -66,6 +71,13 @@ namespace lsp
             static constexpr size_t LFO_MESH_SIZE       = 361;
 
             static constexpr float  DELAY_OUT_MAX_TIME  = 10000.0f;
+
+            enum osc_period_t
+            {
+                OSC_FULL,
+                OSC_FIRST,
+                OSC_LAST
+            };
         } flanger;
 
         // Plugin type metadata

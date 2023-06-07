@@ -4,6 +4,7 @@
 			"circular": "Circular",
 			"cubic": "Cubic",
 			"logarithmic": "Logarithmic",
+			"off": "Off",
 			"parabolic": "Parabolic",
 			"reverse_circular": "Reverse Circular",
 			"reverse_logarithmic": "Reverse Logarithmic",
@@ -15,6 +16,11 @@
 			"stepped_cubic": "Stepped Cubic",
 			"stepped_sine": "Stepped Sine",
 			"triangular": "Triangular"
+		},
+		"period": {
+			"first": "First",
+			"full": "Full",
+			"last": "Last"
 		}
 	}
 }

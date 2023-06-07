@@ -21,8 +21,9 @@
 		<!-- Row 2: LFO settings -->
 		<cell cols="2">
 			<group text="labels.lfo">
-				<grid rows="3" cols="(ex :in_l) ? 5 : 4">
+				<grid rows="3" cols="(ex :in_l) ? 6 : 5">
 					<label text="labels.lfo.rate" />
+					<label text="labels.lfo.crossfade" />
 					<label text="labels.lfo.type" />
 					<label text="labels.lfo.phase" />
 					<ui:if test="ex :in_l">
@@ -31,10 +32,14 @@
 					<label text="actions.reset" />
 					
 					<knob id="rate" />
-					<vbox>
+					<knob id="xfade" />
+					<grid rows="2" cols="2">
 						<combo id="type" />
+						<combo id="period" />
+						
 						<combo id="atype" visibility="ex :in_l" />
-					</vbox>
+						<combo id="aperiod" visibility="ex :in_l" />
+					</grid>
 					<knob id="iphase" />
 					<ui:if test="ex :in_l">
 						<knob id="dphase" />
@@ -42,6 +47,7 @@
 					<button id="reset" size="32" />
 					
 					<value id="rate" />
+					<value id="xfade" />
 					<void />
 					<value id="iphase" />
 					<ui:if test="ex :in_l">
@@ -95,7 +101,9 @@
 				<mesh id="lfo" width="3" color="(ex :ms and :ms) ? 'mid' : 'left'" smooth="true" visibility="(ex :atype) and (:atype ine 0)"/>
 				<mesh id="alfo" width="3" color="(ex :ms and :ms) ? 'side' : 'right'" smooth="true" visibility="(ex :atype) and (:atype ine 0)"/>
 				
-				<!-- Dot -->
+				<!-- Dots and markers -->
+				<marker v="360.0 - 3.6*:xfade" color="graph_marker" />
+				
 				<ui:if test="!(ex :in_r)">
 					<marker v=":clsh" ox="1" oy="0" color="graph_mesh" />
 					<dot x.id="clph" y.id="clsh" color="graph_mesh" bcolor="graph_mesh"/>

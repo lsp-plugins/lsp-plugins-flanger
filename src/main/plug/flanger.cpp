@@ -74,6 +74,7 @@ namespace lsp
             flanger::lfo_rev_sqrt,
             flanger::lfo_circular,
             flanger::lfo_rev_circular,
+            NULL
         };
 
         float flanger::lfo_triangular(float phase)
@@ -213,6 +214,8 @@ namespace lsp
             nPhase          = meta::flanger::PHASE_DFL;
             nOldPhaseStep   = 0;
             nPhaseStep      = 0;
+            nCrossfade      = 0;
+            fCrossfade      = PHASE_COEFF;
             fOldAmount      = 0.0f;
             fAmount         = 0.0f;
             fOldFeedGain    = 0.0f;
@@ -229,6 +232,7 @@ namespace lsp
 
             pBypass         = NULL;
             pRate           = NULL;
+            pCrossfade      = NULL;
             pInitPhase      = NULL;
             pPhaseDiff      = NULL;
             pReset          = NULL;
@@ -297,7 +301,10 @@ namespace lsp
                 c->nOldPhaseShift       = 0;
                 c->nPhaseShift          = 0;
                 c->nLfoType             = -1;
-                c->pLfoFunc             = lfo_triangular;
+                c->nLfoPeriod           = -1;
+                c->fLfoArg[0]           = 1.0f;
+                c->fLfoArg[1]           = 0.0f;
+                c->pLfoFunc             = NULL;
                 c->bSyncLfo             = true;
 
                 c->vIn                  = NULL;
@@ -312,6 +319,7 @@ namespace lsp
 
                 c->pPhase               = NULL;
                 c->pLfoType             = NULL;
+                c->pLfoPeriod           = NULL;
                 c->pLfoShift            = NULL;
                 c->pLfoMesh             = NULL;
                 c->pInLevel             = NULL;
@@ -334,9 +342,14 @@ namespace lsp
             lsp_trace("Binding common ports");
             pBypass             = TRACE_PORT(ports[port_id++]);
             pRate               = TRACE_PORT(ports[port_id++]);
+            pCrossfade          = TRACE_PORT(ports[port_id++]);
             vChannels[0].pLfoType   = TRACE_PORT(ports[port_id++]);
+            vChannels[0].pLfoPeriod = TRACE_PORT(ports[port_id++]);
             if (nChannels > 1)
+            {
                 vChannels[1].pLfoType   = TRACE_PORT(ports[port_id++]);
+                vChannels[1].pLfoPeriod = TRACE_PORT(ports[port_id++]);
+            }
             pInitPhase          = TRACE_PORT(ports[port_id++]);
             if (nChannels > 1)
                 pPhaseDiff          = TRACE_PORT(ports[port_id++]);
@@ -431,7 +444,8 @@ namespace lsp
             float rate              = pRate->value() / fSampleRate;
             float feed_gain         = pFeedGain->value();
             float amount_gain       = pAmount->value();
-            bool mid_side           = pMsSwitch->value();
+            bool mid_side           = (pMsSwitch != NULL) ? pMsSwitch->value() >= 0.5f : false;
+            float crossfade         = pCrossfade->value() * 0.01f;
 
             sReset.submit(pReset->value());
 
@@ -444,6 +458,8 @@ namespace lsp
             nInitPhase              = phase_to_int(pInitPhase->value());
             nOldFeedDelay           = nFeedDelay;
             nFeedDelay              = dspu::millis_to_samples(fSampleRate, pFeedDelay->value());
+            nCrossfade              = double(0x100000000LL) * crossfade;
+            fCrossfade              = PHASE_COEFF * (1.0f - crossfade);
             fOldFeedGain            = fFeedGain;
             fFeedGain               = (pFeedPhase->value() >= 0.5f) ? -feed_gain : feed_gain;
             fOldInGain              = fInGain;
@@ -460,18 +476,49 @@ namespace lsp
 
                 // Update LFO preferences
                 size_t lfo_type         = size_t(c->pLfoType->value());
+                size_t lfo_period       = size_t(c->pLfoPeriod->value());
                 if (i > 0)
+                {
+                    if (lfo_type == 0)
+                        lfo_period              = vChannels[0].nLfoPeriod;
                     lfo_type                = (lfo_type > 0) ? lfo_type - 1 : vChannels[0].nLfoType;
-                if (lfo_type != c->nLfoType)
+                }
+
+                if ((lfo_type != c->nLfoType) || (lfo_period != c->nLfoPeriod))
                 {
                     c->nLfoType             = lfo_type;
+                    c->nLfoPeriod           = lfo_period;
                     c->pLfoFunc             = all_lfo_functions[lfo_type];
                     c->bSyncLfo             = true;
 
+                    // Select the function coefficients
+                    switch (lfo_period)
+                    {
+                        case meta::flanger::OSC_FIRST:
+                            c->fLfoArg[0]       = 0.5f;
+                            c->fLfoArg[1]       = 0.0f;
+                            break;
+                        case meta::flanger::OSC_LAST:
+                            c->fLfoArg[0]       = 0.5f;
+                            c->fLfoArg[1]       = 0.5f;
+                            break;
+                        case meta::flanger::OSC_FULL:
+                        default:
+                            c->fLfoArg[0]       = 1.0f;
+                            c->fLfoArg[1]       = 0.0f;
+                            break;
+                    }
+
                     // Update LFO image
-                    float k                 = 1.0f / (meta::flanger::LFO_MESH_SIZE - 1);
-                    for (size_t i=0; i<meta::flanger::LFO_MESH_SIZE; ++i)
-                        c->vLfoMesh[i]          = c->pLfoFunc(i * k);
+                    float k                 = c->fLfoArg[0] / (meta::flanger::LFO_MESH_SIZE - 1);
+                    if (c->pLfoFunc != NULL)
+                    {
+                        for (size_t i=0; i<meta::flanger::LFO_MESH_SIZE; ++i)
+                            c->vLfoMesh[i]          = c->pLfoFunc(i * k + c->fLfoArg[1]);
+                    }
+                    else
+                        for (size_t i=0; i<meta::flanger::LFO_MESH_SIZE; ++i)
+                            c->vLfoMesh[i]          = 0.0f;
                 }
 
                 // For Mid/Side switch change, clear the buffers
@@ -498,6 +545,12 @@ namespace lsp
             if (sReset.pending())
             {
                 nPhase                  = nInitPhase;
+                for (size_t i=0; i<nChannels; ++i)
+                {
+                    channel_t *c            = &vChannels[i];
+                    c->sRing.clear();
+                    c->sFeedback.clear();
+                }
                 sReset.commit();
             }
 
@@ -546,31 +599,61 @@ namespace lsp
                     phase                   = nPhase;
 
                     // Apply the flanging effect
-                    for (size_t i=0; i<to_do; ++i)
+                    if (c->pLfoFunc != NULL)
                     {
-                        float s                 = i * k_to_do;
-                        float c_phase           = (phase + ilerp(c->nOldPhaseShift, c->nPhaseShift, s)) * PHASE_COEFF;
-                        size_t c_shift          =
-                            ilerp(nOldDepthMin, nDepthMin, s) +
-                            ilerp(nOldDepth, nDepth, s) * c->pLfoFunc(c_phase);
-                        size_t c_fbshift        =
-                            c_shift +
-                            ilerp(nOldFeedDelay, nFeedDelay, s);
+                        for (size_t i=0; i<to_do; ++i)
+                        {
+                            float s                 = i * k_to_do;
+                            uint32_t i_phase        = phase + ilerp(c->nOldPhaseShift, c->nPhaseShift, s);
+                            float c_phase           = i_phase * (fCrossfade * c->fLfoArg[0]) + c->fLfoArg[1];
 
-                        float c_sample          = c->vBuffer[i];
-                        c->sRing.append(c_sample);
+                            float c_sample          = c->vBuffer[i];
+                            c->sRing.append(c_sample);
 
-                        float c_dsample         = c->sRing.get(c_shift);
-                        float c_fbsample        = c->sFeedback.get(c_fbshift);
-                        float c_rsample         = c_dsample + c_fbsample * lerp(fOldFeedGain, fFeedGain, s);
+                            size_t c_shift          =
+                                ilerp(nOldDepthMin, nDepthMin, s) +
+                                ilerp(nOldDepth, nDepth, s) * c->pLfoFunc(c_phase);
+                            size_t c_fbshift        =
+                                c_shift +
+                                ilerp(nOldFeedDelay, nFeedDelay, s);
+                            float c_dsample         = c->sRing.get(c_shift);
+                            float c_fbsample        = c->sFeedback.get(c_fbshift);
 
-                        c->vBuffer[i]           =
-                            c_sample +
-                            c_rsample * lerp(fOldAmount, fAmount, s);
+                            // Perform cross-fade if required
+                            if (i_phase < nCrossfade)
+                            {
+                                float mix               = float(i_phase) / float(nCrossfade);
+                                i_phase                -= nCrossfade;
+                                c_phase                 = i_phase * (fCrossfade * c->fLfoArg[0]) + c->fLfoArg[1];
+                                c_shift                 =
+                                    ilerp(nOldDepthMin, nDepthMin, s) +
+                                    ilerp(nOldDepth, nDepth, s) * c->pLfoFunc(c_phase);
+                                size_t c_fbshift        =
+                                    c_shift +
+                                    ilerp(nOldFeedDelay, nFeedDelay, s);
+                                c_dsample               = lerp(c->sRing.get(c_shift), c_dsample, mix);
+                                c_fbsample              = lerp(c->sFeedback.get(c_fbshift), c_fbsample, mix);
+                            }
 
-                        c->sFeedback.append(c_rsample);
+                            // Do the final processing
+                            float c_rsample         = c_dsample + c_fbsample * lerp(fOldFeedGain, fFeedGain, s);
+                            c->vBuffer[i]           =
+                                c_sample +
+                                c_rsample * lerp(fOldAmount, fAmount, s);
+                            c->sFeedback.append(c_rsample);
 
-                        phase                  += ilerp(nOldPhaseStep, nPhaseStep, s);
+                            // Update the phase
+                            phase                  += ilerp(nOldPhaseStep, nPhaseStep, s);
+                        }
+                    }
+                    else
+                    {
+                        // Do nothing, just update phase
+                        for (size_t i=0; i<to_do; ++i)
+                        {
+                            float s                 = i * k_to_do;
+                            phase                  += ilerp(nOldPhaseStep, nPhaseStep, s);
+                        }
                     }
 
                     // Update channel's phase shift
@@ -624,10 +707,11 @@ namespace lsp
             for (size_t i=0; i<nChannels; ++i)
             {
                 channel_t *c            = &vChannels[i];
-                float phase             = (nPhase + c->nPhaseShift) * PHASE_COEFF;
+                float phase             = (nPhase + c->nPhaseShift) * fCrossfade;
 
                 c->pPhase->set_value(phase * 360.0f);
-                c->pLfoShift->set_value(c->pLfoFunc(phase));
+                c->pLfoShift->set_value(
+                    (c->pLfoFunc != NULL) ? c->pLfoFunc(phase * c->fLfoArg[0] + c->fLfoArg[1]) : 0.0f);
 
                 // Need to synchronize LFO mesh?
                 if (c->bSyncLfo)

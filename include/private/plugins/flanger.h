@@ -55,6 +55,8 @@ namespace lsp
                     uint32_t            nOldPhaseShift;     // Old phase shift
                     uint32_t            nPhaseShift;        // Phase shift
                     size_t              nLfoType;           // Type of LFO
+                    size_t              nLfoPeriod;         // LFO period
+                    float               fLfoArg[2];         // LFO function coefficients (multiplier, adder)
                     lfo_func_t          pLfoFunc;           // LFO function
                     bool                bSyncLfo;           // Synchronize LFO graph
 
@@ -70,6 +72,7 @@ namespace lsp
                     // Output ports
                     plug::IPort        *pPhase;             // Current phase
                     plug::IPort        *pLfoType;           // Oscillator type
+                    plug::IPort        *pLfoPeriod;         // Oscillator period
                     plug::IPort        *pLfoShift;          // LFO shift
                     plug::IPort        *pLfoMesh;           // LFO mesh
                     plug::IPort        *pInLevel;           // Input signal level
@@ -95,6 +98,8 @@ namespace lsp
                 uint32_t            nPhase;             // Current phase value
                 uint32_t            nOldPhaseStep;      // Old phase increment
                 uint32_t            nPhaseStep;         // Phase increment
+                uint32_t            nCrossfade;         // Cross-fade threshold
+                float               fCrossfade;         // Cross-fade coefficient
                 float               fOldAmount;         // Old overal amount
                 float               fAmount;            // The overall amount
                 float               fOldFeedGain;       // Old feedback gain
@@ -111,6 +116,7 @@ namespace lsp
 
                 plug::IPort        *pBypass;            // Bypass
                 plug::IPort        *pRate;              // Rate
+                plug::IPort        *pCrossfade;         // Crossfade amount
                 plug::IPort        *pInitPhase;         // Initial Phase
                 plug::IPort        *pPhaseDiff;         // Phase difference between left and right
                 plug::IPort        *pReset;             // Reset phase to default
@@ -132,6 +138,8 @@ namespace lsp
 
             protected:
                 static float        lfo_triangular(float phase);
+                static float        lfo_sawtooth(float phase);
+                static float        lfo_rev_sawtooth(float phase);
                 static float        lfo_sine(float phase);
                 static float        lfo_step_sine(float phase);
                 static float        lfo_cubic(float phase);
