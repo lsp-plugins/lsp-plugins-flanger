@@ -42,6 +42,8 @@ namespace lsp
                 flanger (const flanger &);
 
             protected:
+                typedef float (*lfo_func_t)(float phase);
+
                 typedef struct channel_t
                 {
                     // DSP processing modules
@@ -52,9 +54,14 @@ namespace lsp
                     // Parameters
                     uint32_t            nOldPhaseShift;     // Old phase shift
                     uint32_t            nPhaseShift;        // Phase shift
-                    float              *vBuffer;            // Processed signal
+                    size_t              nLfoType;           // Type of LFO
+                    lfo_func_t          pLfoFunc;           // LFO function
+                    bool                bSyncLfo;           // Synchronize LFO graph
+
                     float              *vIn;                // Input buffer
                     float              *vOut;               // Output buffer
+                    float              *vBuffer;            // Processed signal
+                    float              *vLfoMesh;           // LFO mesh amplitude data
 
                     // Input ports
                     plug::IPort        *pIn;                // Input port
@@ -62,12 +69,12 @@ namespace lsp
 
                     // Output ports
                     plug::IPort        *pPhase;             // Current phase
+                    plug::IPort        *pLfoType;           // Oscillator type
                     plug::IPort        *pLfoShift;          // LFO shift
+                    plug::IPort        *pLfoMesh;           // LFO mesh
                     plug::IPort        *pInLevel;           // Input signal level
                     plug::IPort        *pOutLevel;          // Output signal level
                 } channel_t;
-
-                typedef float (*lfo_func_t)(float phase);
 
             protected:
                 static lfo_func_t   all_lfo_functions[];
@@ -79,7 +86,6 @@ namespace lsp
                 channel_t          *vChannels;          // Delay channels
                 float              *vBuffer;            // Temporary buffer for audio processing
                 float              *vLfoPhase;          // LFO mesh phase data
-                float              *vLfoMesh;           // LFO mesh amplitude data
 
                 uint32_t            nOldDepthMin;       // Old minimum depth
                 uint32_t            nDepthMin;          // Minimum depth value in samples
@@ -89,8 +95,6 @@ namespace lsp
                 uint32_t            nPhase;             // Current phase value
                 uint32_t            nOldPhaseStep;      // Old phase increment
                 uint32_t            nPhaseStep;         // Phase increment
-                size_t              nLfoType;           // Type of LFO
-                lfo_func_t          pLfoFunc;           // LFO function
                 float               fOldAmount;         // Old overal amount
                 float               fAmount;            // The overall amount
                 float               fOldFeedGain;       // Old feedback gain
@@ -101,15 +105,12 @@ namespace lsp
                 float               fDryGain;           // Dry gain (unprocessed signal)
                 float               fOldWetGain;        // Old wet gain
                 float               fWetGain;           // Wet gain (processed signal)
-                bool                bSyncLfo;           // Synchronize LFO graph
 
                 plug::IPort        *pBypass;            // Bypass
                 plug::IPort        *pRate;              // Rate
-                plug::IPort        *pLfoType;           // Oscillator type
                 plug::IPort        *pInitPhase;         // Initial Phase
                 plug::IPort        *pPhaseDiff;         // Phase difference between left and right
                 plug::IPort        *pReset;             // Reset phase to default
-                plug::IPort        *pLfoMesh;           // LFO mesh
 
                 plug::IPort        *pDepthMin;          // Minimal depth
                 plug::IPort        *pDepth;             // Depth

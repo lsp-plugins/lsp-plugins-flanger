@@ -38,7 +38,7 @@ namespace lsp
             static constexpr float  DEPTH_MIN_DFL       = 0.1f;
             static constexpr float  DEPTH_MIN_STEP      = 0.05f;
 
-            static constexpr float  DEPTH_MIN           = 1.0f;
+            static constexpr float  DEPTH_MIN           = 0.1f;
             static constexpr float  DEPTH_MAX           = 20.0f;
             static constexpr float  DEPTH_DFL           = 2.0f;
             static constexpr float  DEPTH_STEP          = 0.05f;

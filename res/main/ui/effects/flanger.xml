@@ -31,7 +31,10 @@
 					<label text="actions.reset" />
 					
 					<knob id="rate" />
-					<combo id="type" />
+					<vbox>
+						<combo id="type" />
+						<combo id="atype" visibility="ex :in_l" />
+					</vbox>
 					<knob id="iphase" />
 					<ui:if test="ex :in_l">
 						<knob id="dphase" />
@@ -88,7 +91,9 @@
 				<axis min="0" max="1" angle="0"/>
 				
 				<!-- Mesh -->
-				<mesh id="lfo" width="3" color="graph_mesh" smooth="true"/>
+				<mesh id="lfo" width="3" color="graph_mesh" smooth="true" visibility="(!ex :atype) or (:atype ieq 0)"/>
+				<mesh id="lfo" width="3" color="left" smooth="true" visibility="(ex :atype) and (:atype ine 0)"/>
+				<mesh id="alfo" width="3" color="right" smooth="true" visibility="(ex :atype) and (:atype ine 0)"/>
 				
 				<!-- Dot -->
 				<ui:if test="!(ex :in_r)">

@@ -38,22 +38,31 @@ namespace lsp
 {
     namespace meta
     {
+        #define LFO_LIST \
+            { "Triangular",             "flanger.osc.triangular"            }, \
+            { "Sine",                   "flanger.osc.sine"                  }, \
+            { "Stepped Sine",           "flanger.osc.stepped_sine"          }, \
+            { "Cubic",                  "flanger.osc.cubic"                 }, \
+            { "Stepped Cubic",          "flanger.osc.stepped_cubic"         }, \
+            { "Parabolic",              "flanger.osc.parabolic"             }, \
+            { "Reverse Parabolic",      "flanger.osc.reverse_parabolic"     }, \
+            { "Logarithmic",            "flanger.osc.logarithmic"           }, \
+            { "Reverse Logarithmic",    "flanger.osc.reverse_logarithmic"   }, \
+            { "Square Root",            "flanger.osc.square_root"           }, \
+            { "Reverse Square Root",    "flanger.osc.reverse_square_root"   }, \
+            { "Circular",               "flanger.osc.circular"              }, \
+            { "Reverse Circular",       "flanger.osc.reverse_circular"      }, \
+            { NULL, NULL }
+
         static const port_item_t oscillator_functions[] =
         {
-            { "Triangular",             "flanger.osc.triangular"            },
-            { "Sine",                   "flanger.osc.sine"                  },
-            { "Stepped Sine",           "flanger.osc.stepped_sine"          },
-            { "Cubic",                  "flanger.osc.cubic"                 },
-            { "Stepped Cubic",          "flanger.osc.stepped_cubic"         },
-            { "Parabolic",              "flanger.osc.parabolic"             },
-            { "Reverse Parabolic",      "flanger.osc.reverse_parabolic"     },
-            { "Logarithmic",            "flanger.osc.logarithmic"           },
-            { "Reverse Logarithmic",    "flanger.osc.reverse_logarithmic"   },
-            { "Square Root",            "flanger.osc.square_root"           },
-            { "Reverse Square Root",    "flanger.osc.reverse_square_root"   },
-            { "Circular",               "flanger.osc.circular"              },
-            { "Reverse Circular",       "flanger.osc.reverse_circular"      },
-            { NULL, NULL }
+            LFO_LIST
+        };
+
+        static const port_item_t additional_oscillator_functions[] =
+        {
+            { "Same",                   "flanger.osc.same"                  },
+            LFO_LIST
         };
 
         //-------------------------------------------------------------------------
@@ -99,16 +108,18 @@ namespace lsp
             BYPASS,
 
             CONTROL("rate", "Rate", U_HZ, flanger::RATE),
-            COMBO("type", "Oscillator type", 0, oscillator_functions),
+            COMBO("type", "LFO type", 0, oscillator_functions),
+            COMBO("atype", "Additional LFO type", 0, additional_oscillator_functions),
             CYC_CONTROL("iphase", "Initial phase", U_DEG, flanger::PHASE),
             CYC_CONTROL("dphase", "Phase difference between left and right", U_DEG, flanger::PHASE),
             TRIGGER("reset", "Reset phase to initial"),
             MESH("lfo", "LFO graph", 2, flanger::LFO_MESH_SIZE),
+            MESH("alfo", "Additional LFO graph", 2, flanger::LFO_MESH_SIZE),
 
             LOG_CONTROL("dmin", "Min depth", U_MSEC, flanger::DEPTH_MIN),
             LOG_CONTROL("depth", "Depth", U_MSEC, flanger::DEPTH),
             SWITCH("sphase", "Signal phase switch", 0.0f),
-            AMP_GAIN10("amount", "The overall amount of the effect", GAIN_AMP_M_6_DB),
+            AMP_GAIN10("amount", "The overall amount of the effect", GAIN_AMP_0_DB),
             AMP_GAIN1("fgain", "Feedback gain", 0.0f),
             LOG_CONTROL("fdelay", "Feedback delay", U_MSEC, flanger::FEEDBACK_DELAY),
             SWITCH("fphase", "Feedback phase switch", 0.0f),
