@@ -189,6 +189,11 @@ namespace lsp
             return o_value + (n_value - o_value) * k;
         }
 
+        inline float flanger::qlerp(float o_value, float n_value, float k)
+        {
+            return o_value * sqrtf(1.0f - k) + n_value * sqrtf(k);
+        }
+
         inline int32_t flanger::ilerp(int32_t o_value, int32_t n_value, float k)
         {
             return o_value + (n_value - o_value) * k;
@@ -218,6 +223,7 @@ namespace lsp
             nPhaseStep      = 0;
             nCrossfade      = 0;
             fCrossfade      = PHASE_COEFF;
+            pCrossfadeFunc  = qlerp;
             fOldAmount      = 0.0f;
             fAmount         = 0.0f;
             fOldFeedGain    = 0.0f;
@@ -235,6 +241,7 @@ namespace lsp
             pBypass         = NULL;
             pRate           = NULL;
             pCrossfade      = NULL;
+            pCrossfadeType  = NULL;
             pInitPhase      = NULL;
             pPhaseDiff      = NULL;
             pReset          = NULL;
@@ -244,6 +251,7 @@ namespace lsp
             pDepth          = NULL;
             pSignalPhase    = NULL;
             pAmount         = NULL;
+            pFeedOn         = NULL;
             pFeedGain       = NULL;
             pFeedDelay      = NULL;
             pFeedPhase      = NULL;
@@ -345,6 +353,7 @@ namespace lsp
             pBypass             = TRACE_PORT(ports[port_id++]);
             pRate               = TRACE_PORT(ports[port_id++]);
             pCrossfade          = TRACE_PORT(ports[port_id++]);
+            pCrossfadeType      = TRACE_PORT(ports[port_id++]);
             vChannels[0].pLfoType   = TRACE_PORT(ports[port_id++]);
             vChannels[0].pLfoPeriod = TRACE_PORT(ports[port_id++]);
             if (nChannels > 1)
@@ -366,6 +375,7 @@ namespace lsp
             pDepth              = TRACE_PORT(ports[port_id++]);
             pSignalPhase        = TRACE_PORT(ports[port_id++]);
             pAmount             = TRACE_PORT(ports[port_id++]);
+            pFeedOn             = TRACE_PORT(ports[port_id++]);
             pFeedGain           = TRACE_PORT(ports[port_id++]);
             pFeedDelay          = TRACE_PORT(ports[port_id++]);
             pFeedPhase          = TRACE_PORT(ports[port_id++]);
@@ -444,7 +454,8 @@ namespace lsp
             float out_gain          = pOutGain->value();
             bool bypass             = pBypass->value() >= 0.5f;
             float rate              = pRate->value() / fSampleRate;
-            float feed_gain         = pFeedGain->value();
+            bool fb_on              = pFeedOn->value() >= 0.5f;
+            float feed_gain         = (fb_on) ? pFeedGain->value() : 0.0f;
             float amount_gain       = pAmount->value();
             bool mid_side           = (pMsSwitch != NULL) ? pMsSwitch->value() >= 0.5f : false;
             float crossfade         = pCrossfade->value() * 0.01f;
@@ -462,6 +473,7 @@ namespace lsp
             nFeedDelay              = dspu::millis_to_samples(fSampleRate, pFeedDelay->value());
             nCrossfade              = float(PHASE_MAX) * crossfade * 2;
             fCrossfade              = PHASE_COEFF * (1.0f - crossfade);
+            pCrossfadeFunc          = (int(pCrossfadeType->value()) == 0) ? lerp : qlerp;
             fOldFeedGain            = fFeedGain;
             fFeedGain               = (pFeedPhase->value() >= 0.5f) ? -feed_gain : feed_gain;
             fOldInGain              = fInGain;
@@ -633,8 +645,8 @@ namespace lsp
                                 c_fbshift               =
                                     c_shift +
                                     ilerp(nOldFeedDelay, nFeedDelay, s);
-                                c_dsample               = lerp(c->sRing.get(c_shift), c_dsample, mix);
-                                c_fbsample              = lerp(c->sFeedback.get(c_fbshift), c_fbsample, mix);
+                                c_dsample               = pCrossfadeFunc(c->sRing.get(c_shift), c_dsample, mix);
+                                c_fbsample              = pCrossfadeFunc(c->sFeedback.get(c_fbshift), c_fbsample, mix);
                             }
 
                             // Do the final processing

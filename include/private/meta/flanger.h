@@ -63,6 +63,11 @@ namespace lsp
             static constexpr float  CROSSFADE_DFL       = 0.0f;
             static constexpr float  CROSSFADE_STEP      = 0.1f;
 
+            static constexpr float  FEEDBACK_GAIN_MIN   = 0.0f;
+            static constexpr float  FEEDBACK_GAIN_MAX   = 0.891250938134f; // -1 dB
+            static constexpr float  FEEDBACK_GAIN_DFL   = GAIN_AMP_M_6_DB;
+            static constexpr float  FEEDBACK_GAIN_STEP  = 0.01f;
+
             static constexpr float  FEEDBACK_DELAY_MIN  = 0.0f;
             static constexpr float  FEEDBACK_DELAY_MAX  = 5.0f;
             static constexpr float  FEEDBACK_DELAY_DFL  = 0.0f;

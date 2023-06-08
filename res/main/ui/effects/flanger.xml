@@ -32,7 +32,10 @@
 					<label text="actions.reset" />
 					
 					<knob id="rate" />
-					<knob id="xfade" />
+					<vbox>
+						<combo id="xtype" />
+						<knob id="xfade" />
+					</vbox>
 					<grid rows="2" cols="2">
 						<combo id="type" />
 						<combo id="period" />
@@ -138,7 +141,7 @@
 					<label text="labels.depth" />
 					<label text="labels.signal.phase" />
 					<label text="labels.amount" />
-					<label text="labels.feedback" />
+					<button id="fb_on" text="labels.feedback" />
 					<label text="labels.delay" />
 					<label text="labels.signal.phase" />
 					

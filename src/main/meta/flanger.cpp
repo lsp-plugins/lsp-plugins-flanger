@@ -74,6 +74,13 @@ namespace lsp
             { NULL, NULL }
         };
 
+        static const port_item_t crossfade_type[] =
+        {
+            { "Linear",         "fade.linear"      },
+            { "Const Power",    "fade.const_power" },
+            { NULL, NULL }
+        };
+
         //-------------------------------------------------------------------------
         // Plugin metadata
         static const port_t flanger_mono_ports[] =
@@ -85,6 +92,7 @@ namespace lsp
 
             CONTROL("rate", "Rate", U_HZ, flanger::RATE),
             CONTROL("xfade", "Crossfade", U_PERCENT, flanger::CROSSFADE),
+            COMBO("xtype", "Crossfade Type", 1, crossfade_type),
             COMBO("type", "LFO type", 0, oscillator_functions),
             COMBO("period", "LFO period", 0, oscillator_periods),
             CYC_CONTROL("iphase", "Initial phase", U_DEG, flanger::PHASE),
@@ -95,7 +103,8 @@ namespace lsp
             CONTROL("depth", "Depth", U_MSEC, flanger::DEPTH),
             SWITCH("sphase", "Signal phase switch", 0.0f),
             AMP_GAIN10("amount", "The overall amount of the effect", GAIN_AMP_M_6_DB),
-            AMP_GAIN1("fgain", "Feedback gain", 0.0f),
+            SWITCH("fb_on", "Feedback on", 0),
+            CONTROL("fgain", "Feedback gain", U_GAIN_AMP, flanger::FEEDBACK_GAIN),
             CONTROL("fdelay", "Feedback delay", U_MSEC, flanger::FEEDBACK_DELAY),
             SWITCH("fphase", "Feedback phase switch", 0.0f),
 
@@ -121,6 +130,7 @@ namespace lsp
 
             CONTROL("rate", "Rate", U_HZ, flanger::RATE),
             CONTROL("xfade", "Crossfade", U_PERCENT, flanger::CROSSFADE),
+            COMBO("xtype", "Crossfade Type", 1, crossfade_type),
             COMBO("type", "LFO type", 0, oscillator_functions),
             COMBO("period", "LFO period", 0, oscillator_periods),
             COMBO("atype", "Additional LFO type", 0, additional_oscillator_functions),
@@ -136,7 +146,8 @@ namespace lsp
             CONTROL("depth", "Depth", U_MSEC, flanger::DEPTH),
             SWITCH("sphase", "Signal phase switch", 0.0f),
             AMP_GAIN10("amount", "The overall amount of the effect", GAIN_AMP_0_DB),
-            AMP_GAIN1("fgain", "Feedback gain", 0.0f),
+            SWITCH("fb_on", "Feedback on", 0),
+            CONTROL("fgain", "Feedback gain", U_GAIN_AMP, flanger::FEEDBACK_GAIN),
             CONTROL("fdelay", "Feedback delay", U_MSEC, flanger::FEEDBACK_DELAY),
             SWITCH("fphase", "Feedback phase switch", 0.0f),
 

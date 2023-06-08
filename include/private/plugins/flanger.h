@@ -43,6 +43,7 @@ namespace lsp
 
             protected:
                 typedef float (*lfo_func_t)(float phase);
+                typedef float (*mix_func_t)(float o_value, float n_value, float k);
 
                 typedef struct channel_t
                 {
@@ -100,6 +101,7 @@ namespace lsp
                 uint32_t            nPhaseStep;         // Phase increment
                 uint32_t            nCrossfade;         // Cross-fade threshold
                 float               fCrossfade;         // Cross-fade coefficient
+                mix_func_t          pCrossfadeFunc;     // Cross-fade function
                 float               fOldAmount;         // Old overal amount
                 float               fAmount;            // The overall amount
                 float               fOldFeedGain;       // Old feedback gain
@@ -117,6 +119,7 @@ namespace lsp
                 plug::IPort        *pBypass;            // Bypass
                 plug::IPort        *pRate;              // Rate
                 plug::IPort        *pCrossfade;         // Crossfade amount
+                plug::IPort        *pCrossfadeType;     // Crossfade type
                 plug::IPort        *pInitPhase;         // Initial Phase
                 plug::IPort        *pPhaseDiff;         // Phase difference between left and right
                 plug::IPort        *pReset;             // Reset phase to default
@@ -126,6 +129,7 @@ namespace lsp
                 plug::IPort        *pDepth;             // Depth
                 plug::IPort        *pSignalPhase;       // Signal phase
                 plug::IPort        *pAmount;            // Amount
+                plug::IPort        *pFeedOn;            // Feedback enable switch
                 plug::IPort        *pFeedGain;          // Feedback gain
                 plug::IPort        *pFeedDelay;         // Feedback delay
                 plug::IPort        *pFeedPhase;         // Feedback phase
@@ -155,6 +159,7 @@ namespace lsp
 
                 static inline uint32_t  phase_to_int(float phase);
                 static inline float     lerp(float o_value, float n_value, float k);
+                static inline float     qlerp(float o_value, float n_value, float k);
                 static inline int32_t   ilerp(int32_t o_value, int32_t n_value, float k);
 
             public:
