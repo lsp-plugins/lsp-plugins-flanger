@@ -115,6 +115,17 @@
 					<dot x.id="clph_l" y.id="clsh_l" color="(:ms) ? 'mid' : 'left'" bcolor="(:ms) ? 'mid' : 'left'"/>
 					<dot x.id="clph_r" y.id="clsh_r" color="(:ms) ? 'side' : 'right" bcolor="(:ms) ? 'side' : 'right'"/>
 				</ui:if>
+				
+				<!-- text -->
+				<text x="0" y="0" halign="1" valign="-1" text="graph.values.min" />
+				<text x="0" y="1" halign="-1" valign="-1" text="graph.values.max" />
+				<text x="0" y="0.5" halign="0" valign="-1" text="graph.axis.depth" />
+				<ui:for id="i" first="1" count="7">
+					<text x="${:i*45}" y="0" halign="1" valign="1" text="graph.values.x:deg" text:value="${:i*45}" />
+				</ui:for>
+				<text x="360" y="0" halign="1" valign="1" text="graph.axis.phase" />
+				
+				<text x="360.0 - 3.6*:xfade" y="1" halign="-1" valign="1" text="labels.lfo.crossfade" color="graph_marker" />
 			</graph>
 		</cell>
 		
@@ -164,6 +175,11 @@
 					<knob id="dry" scolor="dry" pad.h="6" pad.v="4"/>
 					<knob id="wet" scolor="wet" pad.h="6" pad.v="4"/>
 					<knob id="g_out" pad.h="6" pad.v="4"/>
+					
+					<value id="g_in" />
+					<value id="dry" />
+					<value id="wet" />
+					<value id="g_out" />
 				</grid>
 			</group>
 		</cell>

@@ -28,9 +28,11 @@
 #include <private/plugins/flanger.h>
 
 /* The size of temporary buffer for audio processing */
-static constexpr size_t BUFFER_SIZE             = 512;
-static constexpr float  PHASE_COEFF             = 1.0f / float(0x100000000LL);
-static constexpr float  REV_LN100               = 0.5f / M_LN10;
+static constexpr size_t     BUFFER_SIZE             = 512;
+static constexpr uint32_t   PHASE_MAX               = 0x1000000;
+static constexpr uint32_t   PHASE_MASK              = PHASE_MAX - 1;
+static constexpr float      PHASE_COEFF             = 1.0f / float(PHASE_MAX);
+static constexpr float      REV_LN100               = 0.5f / M_LN10;
 
 namespace lsp
 {
@@ -433,7 +435,7 @@ namespace lsp
 
         inline uint32_t flanger::phase_to_int(float phase)
         {
-            return double(0x100000000LL) * (phase / 360.0f);
+            return float(PHASE_MAX) * (phase / 360.0f);
         }
 
         void flanger::update_settings()
@@ -454,11 +456,11 @@ namespace lsp
             nOldDepth               = nDepth;
             nDepth                  = dspu::millis_to_samples(fSampleRate, pDepth->value());
             nOldPhaseStep           = nPhaseStep;
-            nPhaseStep              = double(0x100000000LL) * rate;
+            nPhaseStep              = float(PHASE_MAX) * rate;
             nInitPhase              = phase_to_int(pInitPhase->value());
             nOldFeedDelay           = nFeedDelay;
             nFeedDelay              = dspu::millis_to_samples(fSampleRate, pFeedDelay->value());
-            nCrossfade              = double(0x100000000LL) * crossfade;
+            nCrossfade              = float(PHASE_MAX) * crossfade * 2;
             fCrossfade              = PHASE_COEFF * (1.0f - crossfade);
             fOldFeedGain            = fFeedGain;
             fFeedGain               = (pFeedPhase->value() >= 0.5f) ? -feed_gain : feed_gain;
@@ -604,8 +606,8 @@ namespace lsp
                         for (size_t i=0; i<to_do; ++i)
                         {
                             float s                 = i * k_to_do;
-                            uint32_t i_phase        = phase + ilerp(c->nOldPhaseShift, c->nPhaseShift, s);
-                            float c_phase           = i_phase * (fCrossfade * c->fLfoArg[0]) + c->fLfoArg[1];
+                            uint32_t i_phase        = (phase + ilerp(c->nOldPhaseShift, c->nPhaseShift, s)) & PHASE_MASK;
+                            float c_phase           = i_phase * fCrossfade * c->fLfoArg[0] + c->fLfoArg[1];
 
                             float c_sample          = c->vBuffer[i];
                             c->sRing.append(c_sample);
@@ -623,12 +625,12 @@ namespace lsp
                             if (i_phase < nCrossfade)
                             {
                                 float mix               = float(i_phase) / float(nCrossfade);
-                                i_phase                -= nCrossfade;
-                                c_phase                 = i_phase * (fCrossfade * c->fLfoArg[0]) + c->fLfoArg[1];
+                                i_phase                 = i_phase + PHASE_MAX;
+                                c_phase                 = i_phase * fCrossfade * c->fLfoArg[0] + c->fLfoArg[1];
                                 c_shift                 =
                                     ilerp(nOldDepthMin, nDepthMin, s) +
                                     ilerp(nOldDepth, nDepth, s) * c->pLfoFunc(c_phase);
-                                size_t c_fbshift        =
+                                c_fbshift               =
                                     c_shift +
                                     ilerp(nOldFeedDelay, nFeedDelay, s);
                                 c_dsample               = lerp(c->sRing.get(c_shift), c_dsample, mix);
@@ -643,7 +645,7 @@ namespace lsp
                             c->sFeedback.append(c_rsample);
 
                             // Update the phase
-                            phase                  += ilerp(nOldPhaseStep, nPhaseStep, s);
+                            phase                   = (phase + ilerp(nOldPhaseStep, nPhaseStep, s)) & PHASE_MASK;
                         }
                     }
                     else
@@ -652,7 +654,7 @@ namespace lsp
                         for (size_t i=0; i<to_do; ++i)
                         {
                             float s                 = i * k_to_do;
-                            phase                  += ilerp(nOldPhaseStep, nPhaseStep, s);
+                            phase                   = (phase + ilerp(nOldPhaseStep, nPhaseStep, s)) & PHASE_MASK;
                         }
                     }
 
@@ -707,7 +709,7 @@ namespace lsp
             for (size_t i=0; i<nChannels; ++i)
             {
                 channel_t *c            = &vChannels[i];
-                float phase             = (nPhase + c->nPhaseShift) * fCrossfade;
+                float phase             = ((nPhase + c->nPhaseShift) & PHASE_MASK) * fCrossfade;
 
                 c->pPhase->set_value(phase * 360.0f);
                 c->pLfoShift->set_value(
