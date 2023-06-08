@@ -17,6 +17,19 @@
 			"stepped_sine": "Stepped Sine",
 			"triangular": "Triangular"
 		},
+		"oversampler": {
+			"2x_high": "2x High",
+			"2x_medium": "2x Medium",
+			"3x_high": "3x High",
+			"3x_medium": "3x Medium",
+			"4x_high": "4x High",
+			"4x_medium": "4x Medium",
+			"6x_high": "6x High",
+			"6x_medium": "6x Medium",
+			"8x_high": "8x High",
+			"8x_medium": "8x Medium",
+			"none": "None"
+		},
 		"period": {
 			"first": "First",
 			"full": "Full",

@@ -21,14 +21,12 @@
 		<!-- Row 2: LFO settings -->
 		<cell cols="2">
 			<group text="labels.lfo">
-				<grid rows="3" cols="(ex :in_l) ? 6 : 5">
+				<grid rows="3" cols="6">
 					<label text="labels.lfo.rate" />
 					<label text="labels.lfo.crossfade" />
 					<label text="labels.lfo.type" />
 					<label text="labels.lfo.phase" />
-					<ui:if test="ex :in_l">
-						<label text="labels.lfo.difference" />
-					</ui:if>
+					<label text="labels.lfo.difference" visibility="ex :in_l" />
 					<label text="actions.reset" />
 					
 					<knob id="rate" />
@@ -44,18 +42,14 @@
 						<combo id="aperiod" visibility="ex :in_l" />
 					</grid>
 					<knob id="iphase" />
-					<ui:if test="ex :in_l">
-						<knob id="dphase" />
-					</ui:if>
+					<knob id="dphase" visibility="ex :in_l" />
 					<button id="reset" size="32" />
 					
 					<value id="rate" />
 					<value id="xfade" />
 					<void />
 					<value id="iphase" />
-					<ui:if test="ex :in_l">
-						<value id="dphase" />
-					</ui:if>
+					<value id="dphase" visibility="ex :in_l" />
 					<void />
 				</grid>
 			</group>
@@ -135,28 +129,31 @@
 		<!-- Row 3: effect settings -->
 		<cell cols="2">
 			<group text="labels.controls">
-				<grid rows="3" cols="8">
-					<label text="labels.chan.mid_side" />
+				<grid rows="3" cols="9">
+					<label text="labels.chan.mid_side" visibility="ex :in_l" />
 					<label text="labels.depth.min" />
 					<label text="labels.depth" />
+					<label text="labels.oversampling" />
 					<label text="labels.signal.phase" />
 					<label text="labels.amount" />
 					<button id="fb_on" text="labels.feedback" />
 					<label text="labels.delay" />
 					<label text="labels.signal.phase" />
 					
-					<button id="ms" size="32" />
+					<button id="ms" size="32" visibility="ex :in_l" />
 					<knob id="dmin" />
 					<knob id="depth" />
+					<combo id="ovs" />
 					<button id="sphase" size="32" />
 					<knob id="amount" />
 					<knob id="fgain" />
 					<knob id="fdelay" />
 					<button id="fphase" size="32" />
 					
-					<void />
+					<void visibility="ex :in_l" />
 					<value id="dmin" />
 					<value id="depth" />
+					<void />
 					<void />
 					<value id="amount" />
 					<value id="fgain" />

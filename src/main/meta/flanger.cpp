@@ -76,9 +76,25 @@ namespace lsp
 
         static const port_item_t crossfade_type[] =
         {
-            { "Linear",         "fade.linear"      },
-            { "Const Power",    "fade.const_power" },
+            { "Linear",                 "fade.linear"      },
+            { "Const Power",            "fade.const_power" },
             { NULL, NULL }
+        };
+
+        static const port_item_t oversampling_mode[] =
+        {
+            { "None",                   "flanger.oversampler.none"          },
+            { "2X Medium",              "flanger.oversampler.2x_medium"     },
+            { "2X High",                "flanger.oversampler.2x_high"       },
+            { "3X Medium",              "flanger.oversampler.3x_medium"     },
+            { "3X High",                "flanger.oversampler.3x_high"       },
+            { "4X Medium",              "flanger.oversampler.4x_medium"     },
+            { "4X High",                "flanger.oversampler.4x_high"       },
+            { "6X Medium",              "flanger.oversampler.6x_medium"     },
+            { "6X High",                "flanger.oversampler.6x_high"       },
+            { "8X Medium",              "flanger.oversampler.8x_medium"     },
+            { "8X High",                "flanger.oversampler.8x_high"       },
+            { NULL,                     NULL}
         };
 
         //-------------------------------------------------------------------------
@@ -103,6 +119,7 @@ namespace lsp
             CONTROL("depth", "Depth", U_MSEC, flanger::DEPTH),
             SWITCH("sphase", "Signal phase switch", 0.0f),
             AMP_GAIN10("amount", "The overall amount of the effect", GAIN_AMP_M_6_DB),
+            COMBO("ovs", "Oversampling", 0, oversampling_mode),
             SWITCH("fb_on", "Feedback on", 0),
             CONTROL("fgain", "Feedback gain", U_GAIN_AMP, flanger::FEEDBACK_GAIN),
             CONTROL("fdelay", "Feedback delay", U_MSEC, flanger::FEEDBACK_DELAY),
@@ -146,6 +163,7 @@ namespace lsp
             CONTROL("depth", "Depth", U_MSEC, flanger::DEPTH),
             SWITCH("sphase", "Signal phase switch", 0.0f),
             AMP_GAIN10("amount", "The overall amount of the effect", GAIN_AMP_0_DB),
+            COMBO("ovs", "Oversampling", 0, oversampling_mode),
             SWITCH("fb_on", "Feedback on", 0),
             CONTROL("fgain", "Feedback gain", U_GAIN_AMP, flanger::FEEDBACK_GAIN),
             CONTROL("fdelay", "Feedback delay", U_MSEC, flanger::FEEDBACK_DELAY),

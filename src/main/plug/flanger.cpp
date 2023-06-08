@@ -28,8 +28,8 @@
 #include <private/plugins/flanger.h>
 
 /* The size of temporary buffer for audio processing */
-static constexpr size_t     BUFFER_SIZE             = 512;
-static constexpr uint32_t   PHASE_MAX               = 0x1000000;
+static constexpr size_t     BUFFER_SIZE             = 0x600;
+static constexpr uint32_t   PHASE_MAX               = 0x80000000;
 static constexpr uint32_t   PHASE_MASK              = PHASE_MAX - 1;
 static constexpr float      PHASE_COEFF             = 1.0f / float(PHASE_MAX);
 static constexpr float      REV_LN100               = 0.5f / M_LN10;
@@ -77,6 +77,21 @@ namespace lsp
             flanger::lfo_circular,
             flanger::lfo_rev_circular,
             NULL
+        };
+
+        dspu::over_mode_t flanger::all_oversampling_modes[] =
+        {
+            dspu::over_mode_t::OM_NONE,
+            dspu::over_mode_t::OM_LANCZOS_2X16BIT,
+            dspu::over_mode_t::OM_LANCZOS_2X24BIT,
+            dspu::over_mode_t::OM_LANCZOS_3X16BIT,
+            dspu::over_mode_t::OM_LANCZOS_3X24BIT,
+            dspu::over_mode_t::OM_LANCZOS_4X16BIT,
+            dspu::over_mode_t::OM_LANCZOS_4X24BIT,
+            dspu::over_mode_t::OM_LANCZOS_6X16BIT,
+            dspu::over_mode_t::OM_LANCZOS_6X24BIT,
+            dspu::over_mode_t::OM_LANCZOS_8X16BIT,
+            dspu::over_mode_t::OM_LANCZOS_8X24BIT
         };
 
         float flanger::lfo_triangular(float phase)
@@ -251,6 +266,7 @@ namespace lsp
             pDepth          = NULL;
             pSignalPhase    = NULL;
             pAmount         = NULL;
+            pOversampling   = NULL;
             pFeedOn         = NULL;
             pFeedGain       = NULL;
             pFeedDelay      = NULL;
@@ -305,8 +321,11 @@ namespace lsp
 
                 // Construct in-place DSP processors
                 c->sBypass.construct();
+                c->sDelay.construct();
                 c->sRing.construct();
                 c->sFeedback.construct();
+                c->sOversampler.construct();
+                c->sOversampler.init();
 
                 c->nOldPhaseShift       = 0;
                 c->nPhaseShift          = 0;
@@ -375,6 +394,7 @@ namespace lsp
             pDepth              = TRACE_PORT(ports[port_id++]);
             pSignalPhase        = TRACE_PORT(ports[port_id++]);
             pAmount             = TRACE_PORT(ports[port_id++]);
+            pOversampling       = TRACE_PORT(ports[port_id++]);
             pFeedOn             = TRACE_PORT(ports[port_id++]);
             pFeedGain           = TRACE_PORT(ports[port_id++]);
             pFeedDelay          = TRACE_PORT(ports[port_id++]);
@@ -412,8 +432,10 @@ namespace lsp
                 {
                     channel_t *c    = &vChannels[i];
                     c->sBypass.destroy();
+                    c->sDelay.destroy();
                     c->sRing.destroy();
                     c->sFeedback.destroy();
+                    c->sOversampler.destroy();
                 }
                 vChannels   = NULL;
             }
@@ -437,9 +459,11 @@ namespace lsp
             for (size_t i=0; i<nChannels; ++i)
             {
                 channel_t *c    = &vChannels[i];
-                c->sRing.init(max_delay + BUFFER_SIZE);
-                c->sFeedback.init(max_feedback + BUFFER_SIZE);
                 c->sBypass.init(sr);
+                c->sDelay.init(BUFFER_SIZE*2);
+                c->sRing.init(max_delay * meta::flanger::OVERSAMPLING_MAX + BUFFER_SIZE*2);
+                c->sFeedback.init(max_feedback * meta::flanger::OVERSAMPLING_MAX + BUFFER_SIZE*2);
+                c->sOversampler.set_sample_rate(sr);
             }
         }
 
@@ -450,10 +474,34 @@ namespace lsp
 
         void flanger::update_settings()
         {
+            // Update oversampling settings
+            dspu::over_mode_t omode = all_oversampling_modes[size_t(pOversampling->value())];
+            for (size_t i=0; i<nChannels; ++i)
+            {
+                channel_t *c            = &vChannels[i];
+
+                if (c->sOversampler.mode() != omode)
+                {
+                    c->sOversampler.set_mode(omode);
+                    c->sOversampler.set_filtering(false);
+                    c->sOversampler.update_settings();
+
+                    c->sDelay.set_delay(c->sOversampler.latency());
+                    c->sDelay.clear();
+                    c->sDelay.clear();
+                    c->sRing.clear();
+                    c->sFeedback.clear();
+                }
+            }
+            size_t oversampling     = vChannels[0].sOversampler.get_oversampling();
+            size_t latency          = vChannels[0].sOversampler.latency();
+
+            // Update normal attributes
             float in_gain           = pInGain->value();
             float out_gain          = pOutGain->value();
             bool bypass             = pBypass->value() >= 0.5f;
-            float rate              = pRate->value() / fSampleRate;
+            size_t srate            = fSampleRate * oversampling;
+            float rate              = pRate->value() / srate;
             bool fb_on              = pFeedOn->value() >= 0.5f;
             float feed_gain         = (fb_on) ? pFeedGain->value() : 0.0f;
             float amount_gain       = pAmount->value();
@@ -463,14 +511,14 @@ namespace lsp
             sReset.submit(pReset->value());
 
             nOldDepthMin            = nDepthMin;
-            nDepthMin               = dspu::millis_to_samples(fSampleRate, pDepthMin->value());
+            nDepthMin               = dspu::millis_to_samples(srate, pDepthMin->value());
             nOldDepth               = nDepth;
-            nDepth                  = dspu::millis_to_samples(fSampleRate, pDepth->value());
+            nDepth                  = dspu::millis_to_samples(srate, pDepth->value());
             nOldPhaseStep           = nPhaseStep;
             nPhaseStep              = float(PHASE_MAX) * rate;
-            nInitPhase              = phase_to_int(pInitPhase->value());
+            nInitPhase              = (phase_to_int(pInitPhase->value()) - nPhaseStep * latency) & PHASE_MASK;
             nOldFeedDelay           = nFeedDelay;
-            nFeedDelay              = dspu::millis_to_samples(fSampleRate, pFeedDelay->value());
+            nFeedDelay              = dspu::millis_to_samples(srate, pFeedDelay->value());
             nCrossfade              = float(PHASE_MAX) * crossfade * 2;
             fCrossfade              = PHASE_COEFF * (1.0f - crossfade);
             pCrossfadeFunc          = (int(pCrossfadeType->value()) == 0) ? lerp : qlerp;
@@ -551,6 +599,9 @@ namespace lsp
             }
 
             bMidSide                = mid_side;
+
+            // Update latency
+            set_latency(latency);
         }
 
         void flanger::process(size_t samples)
@@ -579,10 +630,12 @@ namespace lsp
                 c->pInLevel->set_value(dsp::abs_max(c->vIn, samples));
             }
 
+            size_t oversampling     = vChannels[0].sOversampler.get_oversampling();
+            size_t max_buf_samples  = BUFFER_SIZE / oversampling;
+
             for (size_t offset=0; offset<samples; )
             {
-                uint32_t to_do          = lsp_min(samples - offset, BUFFER_SIZE);
-                float k_to_do           = 1.0f / float(to_do);
+                uint32_t to_do          = lsp_min(samples - offset, max_buf_samples);
                 uint32_t phase          = nPhase;
 
                 // Convert to Mid/Side if needed
@@ -612,12 +665,17 @@ namespace lsp
                     channel_t *c            = &vChannels[nc];
                     phase                   = nPhase;
 
+                    // Apply oversampling and delay
+                    uint32_t up_to_do       = to_do * oversampling;
+                    float k_up_to_do        = 1.0f / float(up_to_do);
+                    c->sOversampler.upsample(c->vBuffer, c->vBuffer, to_do);
+
                     // Apply the flanging effect
                     if (c->pLfoFunc != NULL)
                     {
-                        for (size_t i=0; i<to_do; ++i)
+                        for (size_t i=0; i<up_to_do; ++i)
                         {
-                            float s                 = i * k_to_do;
+                            float s                 = i * k_up_to_do;
                             uint32_t i_phase        = (phase + ilerp(c->nOldPhaseShift, c->nPhaseShift, s)) & PHASE_MASK;
                             float c_phase           = i_phase * fCrossfade * c->fLfoArg[0] + c->fLfoArg[1];
 
@@ -665,10 +723,13 @@ namespace lsp
                         // Do nothing, just update phase
                         for (size_t i=0; i<to_do; ++i)
                         {
-                            float s                 = i * k_to_do;
+                            float s                 = i * k_up_to_do;
                             phase                   = (phase + ilerp(nOldPhaseStep, nPhaseStep, s)) & PHASE_MASK;
                         }
                     }
+
+                    // Perform downsampling
+                    c->sOversampler.downsample(c->vBuffer, c->vBuffer, to_do);
 
                     // Update channel's phase shift
                     c->nOldPhaseShift       = c->nPhaseShift;
@@ -690,8 +751,13 @@ namespace lsp
                 for (size_t nc=0; nc<nChannels; ++nc)
                 {
                     channel_t *c            = &vChannels[nc];
+
+                    // Apply latency compensation
+                    c->sDelay.process(vBuffer, c->vIn, to_do);
+
+                    // Mix dry/wet
                     dsp::lramp1(c->vBuffer, fOldWetGain, fWetGain, to_do);
-                    dsp::lramp_add2(c->vBuffer, c->vIn, fOldDryGain, fDryGain, to_do);
+                    dsp::lramp_add2(c->vBuffer, vBuffer, fOldDryGain, fDryGain, to_do);
                     c->pOutLevel->set_value(dsp::abs_max(c->vBuffer, to_do));
 
                     // Apply bypass

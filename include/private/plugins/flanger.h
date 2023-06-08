@@ -22,7 +22,9 @@
 #ifndef PRIVATE_PLUGINS_FLANGER_H_
 #define PRIVATE_PLUGINS_FLANGER_H_
 
+#include <lsp-plug.in/dsp-units/util/Delay.h>
 #include <lsp-plug.in/dsp-units/util/RingBuffer.h>
+#include <lsp-plug.in/dsp-units/util/Oversampler.h>
 #include <lsp-plug.in/dsp-units/ctl/Bypass.h>
 #include <lsp-plug.in/dsp-units/ctl/Toggle.h>
 #include <lsp-plug.in/plug-fw/plug.h>
@@ -45,12 +47,16 @@ namespace lsp
                 typedef float (*lfo_func_t)(float phase);
                 typedef float (*mix_func_t)(float o_value, float n_value, float k);
 
+                struct channel_t;
+
                 typedef struct channel_t
                 {
                     // DSP processing modules
                     dspu::Bypass        sBypass;            // Bypass
+                    dspu::Delay         sDelay;             // Delay for dry signal
                     dspu::RingBuffer    sRing;              // Ring buffer for flanger effect processing
                     dspu::RingBuffer    sFeedback;          // Feedback delay buffer
+                    dspu::Oversampler   sOversampler;       // Oversampler
 
                     // Parameters
                     uint32_t            nOldPhaseShift;     // Old phase shift
@@ -81,7 +87,8 @@ namespace lsp
                 } channel_t;
 
             protected:
-                static lfo_func_t   all_lfo_functions[];
+                static lfo_func_t           all_lfo_functions[];
+                static dspu::over_mode_t    all_oversampling_modes[];
 
             protected:
                 dspu::Toggle        sReset;             // Reset toggle
@@ -129,6 +136,7 @@ namespace lsp
                 plug::IPort        *pDepth;             // Depth
                 plug::IPort        *pSignalPhase;       // Signal phase
                 plug::IPort        *pAmount;            // Amount
+                plug::IPort        *pOversampling;      // Oversampling
                 plug::IPort        *pFeedOn;            // Feedback enable switch
                 plug::IPort        *pFeedGain;          // Feedback gain
                 plug::IPort        *pFeedDelay;         // Feedback delay

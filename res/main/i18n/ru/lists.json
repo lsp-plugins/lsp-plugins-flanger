@@ -17,6 +17,19 @@
 			"stepped_sine": "Ступенчатая синусоидальная",
 			"triangular": "Треугольная"
 		},
+		"oversampler": {
+			"2x_high": "2x Высоко",
+			"2x_medium": "2x Средне",
+			"3x_high": "3x Высоко",
+			"3x_medium": "3x Средне",
+			"4x_high": "4x Высоко",
+			"4x_medium": "4x Средне",
+			"6x_high": "6x Высоко",
+			"6x_medium": "6x Средне",
+			"8x_high": "8x Высоко",
+			"8x_medium": "8x Средне",
+			"none": "None"
+		},
 		"period": {
 			"first": "Первый",
 			"full": "Полный",

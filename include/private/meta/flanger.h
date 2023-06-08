@@ -74,6 +74,7 @@ namespace lsp
             static constexpr float  FEEDBACK_DELAY_STEP = 0.01f;
 
             static constexpr size_t LFO_MESH_SIZE       = 361;
+            static constexpr size_t OVERSAMPLING_MAX    = 8;
 
             static constexpr float  DELAY_OUT_MAX_TIME  = 10000.0f;
 
