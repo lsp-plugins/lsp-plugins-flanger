@@ -81,6 +81,13 @@ namespace lsp
             { NULL, NULL }
         };
 
+        static const port_item_t rate_type[] =
+        {
+            { "Rate",                   "flanger.rate.rate"                 },
+            { "Tempo",                  "flanger.rate.tempo"                },
+            { NULL, NULL }
+        };
+
         static const port_item_t oversampling_mode[] =
         {
             { "None",                   "flanger.oversampler.none"          },
@@ -107,6 +114,11 @@ namespace lsp
             BYPASS,
 
             CONTROL("rate", "Rate", U_HZ, flanger::RATE),
+            CONTROL("frac", "Time fraction", U_BAR, flanger::FRACTION),
+            CONTROL("denom", "Time fraction denominator", U_BAR, flanger::DENOMINATOR),
+            CONTROL("tempo", "Tempo", U_BPM, flanger::TEMPO),
+            SWITCH("sync", "Tempo sync", 0.0f),
+            COMBO("time", "Time computing method", 0, rate_type),
             CONTROL("xfade", "Crossfade", U_PERCENT, flanger::CROSSFADE),
             COMBO("xtype", "Crossfade Type", 1, crossfade_type),
             COMBO("type", "LFO type", 0, oscillator_functions),
@@ -146,6 +158,11 @@ namespace lsp
             BYPASS,
 
             CONTROL("rate", "Rate", U_HZ, flanger::RATE),
+            CONTROL("frac", "Time fraction", U_BAR, flanger::FRACTION),
+            CONTROL("denom", "Time fraction denominator", U_BAR, flanger::DENOMINATOR),
+            CONTROL("tempo", "Tempo", U_BPM, flanger::TEMPO),
+            SWITCH("sync", "Tempo sync", 0.0f),
+            COMBO("time", "Time computing method", 0, rate_type),
             CONTROL("xfade", "Crossfade", U_PERCENT, flanger::CROSSFADE),
             COMBO("xtype", "Crossfade Type", 1, crossfade_type),
             COMBO("type", "LFO type", 0, oscillator_functions),

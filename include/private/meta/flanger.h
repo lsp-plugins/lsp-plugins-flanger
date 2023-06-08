@@ -73,6 +73,21 @@ namespace lsp
             static constexpr float  FEEDBACK_DELAY_DFL  = 0.0f;
             static constexpr float  FEEDBACK_DELAY_STEP = 0.01f;
 
+            static constexpr float  TEMPO_MIN           = 20.0f;
+            static constexpr float  TEMPO_MAX           = 360.0f;
+            static constexpr float  TEMPO_STEP          = 0.1f;
+            static constexpr float  TEMPO_DFL           = 120.0f;
+
+            static constexpr float  FRACTION_MIN        = 1.0f / 64.0f;
+            static constexpr float  FRACTION_MAX        = 8.0f;
+            static constexpr float  FRACTION_STEP       = 1.0f / 64.0f;
+            static constexpr float  FRACTION_DFL        = 1.0f;
+
+            static constexpr float  DENOMINATOR_MIN     = 1.0f;
+            static constexpr float  DENOMINATOR_MAX     = 64.0f;
+            static constexpr float  DENOMINATOR_STEP    = 1.0f;
+            static constexpr float  DENOMINATOR_DFL     = 4.0f;
+
             static constexpr size_t LFO_MESH_SIZE       = 361;
             static constexpr size_t OVERSAMPLING_MAX    = 8;
 

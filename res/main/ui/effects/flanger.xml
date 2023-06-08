@@ -21,15 +21,23 @@
 		<!-- Row 2: LFO settings -->
 		<cell cols="2">
 			<group text="labels.lfo">
-				<grid rows="3" cols="6">
-					<label text="labels.lfo.rate" />
+				<grid rows="3" cols="7">
+					<combo id="time" />
+					<label text="labels.tempo" />
 					<label text="labels.lfo.crossfade" />
 					<label text="labels.lfo.type" />
 					<label text="labels.lfo.phase" />
 					<label text="labels.lfo.difference" visibility="ex :in_l" />
 					<label text="actions.reset" />
 					
-					<knob id="rate" />
+					<hbox>
+						<knob id="rate" visibility=":time ieq 0" />
+						<frac id="frac" den.id="denom" max="8" color="green" visibility=":time ieq 1" />
+					</hbox>
+					<hbox>
+						<knob id="tempo" visibility="!:sync" pad="0"/>
+						<indicator id="_time_bpm" format="f4.1!" pad="0" visibility=":sync" text_color="green"/>
+					</hbox>
 					<vbox>
 						<combo id="xtype" />
 						<knob id="xfade" />
@@ -45,7 +53,20 @@
 					<knob id="dphase" visibility="ex :in_l" />
 					<button id="reset" size="32" />
 					
-					<value id="rate" />
+					<hbox>
+						<value id="rate" visibility=":time ieq 0" />
+						<value id="frac" visibility=":time ieq 1" />
+					</hbox>
+					<grid rows="2" cols="2">
+						<cell cols="2">
+							<hbox>
+								<label text="labels.host_bpm" visibility=":sync"/>
+								<value id="tempo" same_line="true" visibility="!:sync"/>
+							</hbox>
+						</cell>
+						<button id="sync" text="labels.sync" ui:inject="Button_green"/>
+						<ttap id="tempo" text="actions.tap" tcolor="label_text" visibility="!:sync"/>
+					</grid>
 					<value id="xfade" />
 					<void />
 					<value id="iphase" />

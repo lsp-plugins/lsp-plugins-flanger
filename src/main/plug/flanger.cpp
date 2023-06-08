@@ -255,6 +255,10 @@ namespace lsp
 
             pBypass         = NULL;
             pRate           = NULL;
+            pFraction       = NULL;
+            pTempo          = NULL;
+            pTempoSync      = NULL;
+            pTimeMode       = NULL;
             pCrossfade      = NULL;
             pCrossfadeType  = NULL;
             pInitPhase      = NULL;
@@ -371,6 +375,11 @@ namespace lsp
             lsp_trace("Binding common ports");
             pBypass             = TRACE_PORT(ports[port_id++]);
             pRate               = TRACE_PORT(ports[port_id++]);
+            pFraction           = TRACE_PORT(ports[port_id++]);
+            TRACE_PORT(ports[port_id++]);   // Skip denominator
+            pTempo              = TRACE_PORT(ports[port_id++]);
+            pTempoSync          = TRACE_PORT(ports[port_id++]);
+            pTimeMode           = TRACE_PORT(ports[port_id++]);
             pCrossfade          = TRACE_PORT(ports[port_id++]);
             pCrossfadeType      = TRACE_PORT(ports[port_id++]);
             vChannels[0].pLfoType   = TRACE_PORT(ports[port_id++]);
@@ -496,20 +505,35 @@ namespace lsp
             size_t oversampling     = vChannels[0].sOversampler.get_oversampling();
             size_t latency          = vChannels[0].sOversampler.latency();
 
-            // Update normal attributes
+            // Update state of the 'reset' trigger
+            sReset.submit(pReset->value());
+
+            // Pre-compute several attributes
             float in_gain           = pInGain->value();
             float out_gain          = pOutGain->value();
             bool bypass             = pBypass->value() >= 0.5f;
             size_t srate            = fSampleRate * oversampling;
-            float rate              = pRate->value() / srate;
             bool fb_on              = pFeedOn->value() >= 0.5f;
             float feed_gain         = (fb_on) ? pFeedGain->value() : 0.0f;
             float amount_gain       = pAmount->value();
             bool mid_side           = (pMsSwitch != NULL) ? pMsSwitch->value() >= 0.5f : false;
             float crossfade         = pCrossfade->value() * 0.01f;
 
-            sReset.submit(pReset->value());
+            // Compute LFO rate
+            float rate              = pRate->value();
+            if (pTimeMode->value() >= 1.0f)
+            {
+                // Use tempo instead of rate
+                float tempo             = (pTempoSync->value() >= 0.5f) ? pWrapper->position()->beatsPerMinute : pTempo->value();
+                rate                    =
+                    lsp_limit(
+                        dspu::time_signature_to_frequency(pFraction->value(), tempo),
+                        meta::flanger::RATE_MIN,
+                        meta::flanger::RATE_MAX);
+            }
+            rate                   /= srate;
 
+            // Update common parameters
             nOldDepthMin            = nDepthMin;
             nDepthMin               = dspu::millis_to_samples(srate, pDepthMin->value());
             nOldDepth               = nDepth;
@@ -602,6 +626,11 @@ namespace lsp
 
             // Update latency
             set_latency(latency);
+        }
+
+        bool flanger::set_position(const plug::position_t *pos)
+        {
+            return pos->beatsPerMinute != pWrapper->position()->beatsPerMinute;
         }
 
         void flanger::process(size_t samples)

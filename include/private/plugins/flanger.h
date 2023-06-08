@@ -125,6 +125,10 @@ namespace lsp
 
                 plug::IPort        *pBypass;            // Bypass
                 plug::IPort        *pRate;              // Rate
+                plug::IPort        *pFraction;          // Fraction
+                plug::IPort        *pTempo;             // Tempo
+                plug::IPort        *pTempoSync;         // Tempo sync
+                plug::IPort        *pTimeMode;          // Time mode selector (rate/tempo)
                 plug::IPort        *pCrossfade;         // Crossfade amount
                 plug::IPort        *pCrossfadeType;     // Crossfade type
                 plug::IPort        *pInitPhase;         // Initial Phase
@@ -180,6 +184,7 @@ namespace lsp
             public:
                 virtual void        update_sample_rate(long sr) override;
                 virtual void        update_settings() override;
+                virtual bool        set_position(const plug::position_t *pos) override;
                 virtual void        process(size_t samples) override;
                 virtual void        ui_activated() override;
                 virtual bool        inline_display(plug::ICanvas *cv, size_t width, size_t height) override;
