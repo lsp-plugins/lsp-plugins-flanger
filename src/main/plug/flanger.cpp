@@ -33,7 +33,6 @@ static constexpr size_t     BUFFER_SIZE             = 0x600;
 static constexpr uint32_t   PHASE_MAX               = 0x80000000;
 static constexpr uint32_t   PHASE_MASK              = PHASE_MAX - 1;
 static constexpr float      PHASE_COEFF             = 1.0f / float(PHASE_MAX);
-static constexpr float      REV_LN100               = 0.5f / M_LN10;
 
 namespace lsp
 {
