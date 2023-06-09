@@ -24,6 +24,7 @@
 #include <lsp-plug.in/dsp/dsp.h>
 #include <lsp-plug.in/dsp-units/units.h>
 #include <lsp-plug.in/plug-fw/meta/func.h>
+#include <lsp-plug.in/shared/id_colors.h>
 
 #include <private/plugins/flanger.h>
 
@@ -252,6 +253,7 @@ namespace lsp
             fOldWetGain     = 0.0f;
             fWetGain        = 0.0f;
             bMidSide        = false;
+            bCustomLfo      = false;
 
             pBypass         = NULL;
             pRate           = NULL;
@@ -280,6 +282,7 @@ namespace lsp
             pWet            = NULL;
             pOutGain        = NULL;
 
+            pIDisplay       = NULL;
             pData           = NULL;
         }
 
@@ -338,6 +341,8 @@ namespace lsp
                 c->fLfoArg[0]           = 1.0f;
                 c->fLfoArg[1]           = 0.0f;
                 c->pLfoFunc             = NULL;
+                c->fOutPhase            = 0.0f;
+                c->fOutShift            = 0.0f;
                 c->bSyncLfo             = true;
 
                 c->vIn                  = NULL;
@@ -451,6 +456,13 @@ namespace lsp
 
             vBuffer     = NULL;
 
+            // Destroy inline display buffer
+            if (pIDisplay != NULL)
+            {
+                pIDisplay->destroy();
+                pIDisplay   = NULL;
+            }
+
             // Free previously allocated data chunk
             if (pData != NULL)
             {
@@ -556,6 +568,8 @@ namespace lsp
             fWetGain                = pWet->value() * out_gain;
             fAmount                 = (pSignalPhase->value() >= 0.5f) ? -amount_gain : amount_gain;
 
+            bool custom_lfo         = false;
+
             for (size_t i=0; i<nChannels; ++i)
             {
                 channel_t *c            = &vChannels[i];
@@ -565,9 +579,10 @@ namespace lsp
                 size_t lfo_period       = size_t(c->pLfoPeriod->value());
                 if (i > 0)
                 {
-                    if (lfo_type == 0)
+                    custom_lfo              = lfo_type > 0;
+                    if (!custom_lfo)
                         lfo_period              = vChannels[0].nLfoPeriod;
-                    lfo_type                = (lfo_type > 0) ? lfo_type - 1 : vChannels[0].nLfoType;
+                    lfo_type                = (custom_lfo) ? lfo_type - 1 : vChannels[0].nLfoType;
                 }
 
                 if ((lfo_type != c->nLfoType) || (lfo_period != c->nLfoPeriod))
@@ -623,6 +638,7 @@ namespace lsp
             }
 
             bMidSide                = mid_side;
+            bCustomLfo              = custom_lfo;
 
             // Update latency
             set_latency(latency);
@@ -706,14 +722,18 @@ namespace lsp
                         {
                             float s                 = i * k_up_to_do;
                             uint32_t i_phase        = (phase + ilerp(c->nOldPhaseShift, c->nPhaseShift, s)) & PHASE_MASK;
-                            float c_phase           = i_phase * fCrossfade * c->fLfoArg[0] + c->fLfoArg[1];
+                            float o_phase           = i_phase * fCrossfade;
+                            float c_phase           = o_phase * c->fLfoArg[0] + c->fLfoArg[1];
+                            float c_func            = c->pLfoFunc(c_phase);
 
                             float c_sample          = c->vBuffer[i];
                             c->sRing.append(c_sample);
+                            c->fOutPhase            = o_phase;
+                            c->fOutShift            = c_func;
 
                             size_t c_shift          =
                                 ilerp(nOldDepthMin, nDepthMin, s) +
-                                ilerp(nOldDepth, nDepth, s) * c->pLfoFunc(c_phase);
+                                ilerp(nOldDepth, nDepth, s) * c_func;
                             size_t c_fbshift        =
                                 c_shift +
                                 ilerp(nOldFeedDelay, nFeedDelay, s);
@@ -753,8 +773,13 @@ namespace lsp
                         for (size_t i=0; i<to_do; ++i)
                         {
                             float s                 = i * k_up_to_do;
+                            uint32_t i_phase        = (phase + ilerp(c->nOldPhaseShift, c->nPhaseShift, s)) & PHASE_MASK;
+                            float o_phase           = i_phase * fCrossfade;
+                            c->fOutPhase            = o_phase;
                             phase                   = (phase + ilerp(nOldPhaseStep, nPhaseStep, s)) & PHASE_MASK;
                         }
+
+                        c->fOutShift            = 0.0f;
                     }
 
                     // Perform downsampling
@@ -816,11 +841,9 @@ namespace lsp
             for (size_t i=0; i<nChannels; ++i)
             {
                 channel_t *c            = &vChannels[i];
-                float phase             = ((nPhase + c->nPhaseShift) & PHASE_MASK) * fCrossfade;
 
-                c->pPhase->set_value(phase * 360.0f);
-                c->pLfoShift->set_value(
-                    (c->pLfoFunc != NULL) ? c->pLfoFunc(phase * c->fLfoArg[0] + c->fLfoArg[1]) : 0.0f);
+                c->pPhase->set_value(c->fOutPhase * 360.0f);
+                c->pLfoShift->set_value(c->fOutShift);
 
                 // Need to synchronize LFO mesh?
                 if (c->bSyncLfo)
@@ -853,8 +876,113 @@ namespace lsp
 
         bool flanger::inline_display(plug::ICanvas *cv, size_t width, size_t height)
         {
-            // TODO
-            return false;
+            // Check proportions
+            if (height > width)
+                height  = width;
+
+            // Init canvas
+            if (!cv->init(width, height))
+                return false;
+            width   = cv->width();
+            height  = cv->height();
+
+            // Clear background
+            bool bypassing = vChannels[0].sBypass.bypassing();
+            cv->set_color_rgb((bypassing) ? CV_DISABLED : CV_BACKGROUND);
+            cv->paint();
+
+            // Draw horizontal and vertical lines
+            cv->set_line_width(1.0);
+            cv->set_color_rgb((bypassing) ? CV_SILVER: CV_YELLOW, 0.5f);
+            for (float i=1; i < 8; ++i)
+            {
+                float y = i * 45.0f;
+                float x = i * 0.0125f;
+                cv->line(0, y, width, y);
+                cv->line(x, 0, x, height);
+            }
+
+            // Reuse display
+            size_t count        = lsp_max(width, height);
+            pIDisplay           = core::IDBuffer::reuse(pIDisplay, 2, count);
+            core::IDBuffer *b   = pIDisplay;
+            if (b == NULL)
+                return false;
+
+            static const uint32_t c_colors[] = {
+                CV_MIDDLE_CHANNEL,
+                CV_LEFT_CHANNEL, CV_RIGHT_CHANNEL,
+                CV_MIDDLE_CHANNEL, CV_SIDE_CHANNEL
+            };
+
+            const uint32_t *colors  = &c_colors[0];
+            size_t lines            = 1;
+            if ((nChannels > 1) && (bCustomLfo))
+            {
+                colors  = (bMidSide) ? &c_colors[3] : &c_colors[1];
+                lines   = 2;
+            }
+
+            bool aa = cv->set_anti_aliasing(true);
+            lsp_finally { cv->set_anti_aliasing(aa); };
+
+            cv->set_line_width(2);
+
+            dsp::lramp_set1(b->v[1], 0.0f, height-1, count);
+
+            for (size_t i=0; i<lines; ++i)
+            {
+                channel_t *c    = &vChannels[i];
+
+                for (size_t j=0; j<count; ++j)
+                {
+                    size_t k        = (j*meta::flanger::LFO_MESH_SIZE)/count;
+                    b->v[0][j]      = c->vLfoMesh[k] * width;
+                }
+
+                // Draw mesh
+                uint32_t color = (bypassing || !(active())) ? CV_SILVER : colors[i];
+                cv->set_color_rgb(color);
+                cv->draw_lines(b->v[0], b->v[1], count);
+            }
+
+            // Draw dots with lines
+            if (active())
+            {
+                colors  = (nChannels <= 1) ? &c_colors[0] :
+                          (bMidSide) ? &c_colors[3] : &c_colors[1];
+                cv->set_line_width(1);
+
+                // Draw lines first
+                for (size_t i=0; i<nChannels; ++i)
+                {
+                    channel_t *c    = &vChannels[i];
+                    cv->set_color_rgb(colors[i]);
+                    float x = c->fOutShift * width;
+                    cv->line(x, 0, x, height);
+                }
+
+                // Draw dots next
+                for (size_t i=0; i<nChannels; ++i)
+                {
+                    channel_t *c    = &vChannels[i];
+
+                    uint32_t color = (bypassing) ? CV_SILVER : colors[i];
+                    Color c1(color), c2(color);
+                    c2.alpha(0.9);
+
+                    float x = c->fOutShift * width;
+                    float y = c->fOutPhase * height;
+
+                    cv->radial_gradient(x, y, c1, c2, 12);
+                    cv->set_color_rgb(0);
+                    cv->circle(x, y, 4);
+                    cv->set_color_rgb(color);
+                    cv->circle(x, y, 3);
+                }
+            }
+
+            return true;
         }
 
         void flanger::dump(dspu::IStateDumper *v) const

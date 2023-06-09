@@ -27,7 +27,9 @@
 #include <lsp-plug.in/dsp-units/util/Oversampler.h>
 #include <lsp-plug.in/dsp-units/ctl/Bypass.h>
 #include <lsp-plug.in/dsp-units/ctl/Toggle.h>
+#include <lsp-plug.in/plug-fw/core/IDBuffer.h>
 #include <lsp-plug.in/plug-fw/plug.h>
+
 #include <private/meta/flanger.h>
 
 namespace lsp
@@ -65,6 +67,8 @@ namespace lsp
                     size_t              nLfoPeriod;         // LFO period
                     float               fLfoArg[2];         // LFO function coefficients (multiplier, adder)
                     lfo_func_t          pLfoFunc;           // LFO function
+                    float               fOutPhase;          // Output phase for drawing
+                    float               fOutShift;          // Output shift for drawing
                     bool                bSyncLfo;           // Synchronize LFO graph
 
                     float              *vIn;                // Input buffer
@@ -122,6 +126,7 @@ namespace lsp
                 float               fOldWetGain;        // Old wet gain
                 float               fWetGain;           // Wet gain (processed signal)
                 bool                bMidSide;           // Mid/Side mode
+                bool                bCustomLfo;         // Custom LFO flag
 
                 plug::IPort        *pBypass;            // Bypass
                 plug::IPort        *pRate;              // Rate
@@ -149,6 +154,8 @@ namespace lsp
                 plug::IPort        *pDry;               // Dry gain
                 plug::IPort        *pWet;               // Wet gain
                 plug::IPort        *pOutGain;           // Output gain
+
+                core::IDBuffer     *pIDisplay;          // Inline display buffer
 
                 uint8_t            *pData;              // Allocated data
 
