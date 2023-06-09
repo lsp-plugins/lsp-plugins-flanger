@@ -256,6 +256,7 @@ namespace lsp
             bCustomLfo      = false;
 
             pBypass         = NULL;
+            pMono           = NULL;
             pRate           = NULL;
             pFraction       = NULL;
             pTempo          = NULL;
@@ -379,6 +380,8 @@ namespace lsp
             // Bind bypass
             lsp_trace("Binding common ports");
             pBypass             = TRACE_PORT(ports[port_id++]);
+            if (nChannels > 1)
+                pMono               = TRACE_PORT(ports[port_id++]);
             pRate               = TRACE_PORT(ports[port_id++]);
             pFraction           = TRACE_PORT(ports[port_id++]);
             TRACE_PORT(ports[port_id++]);   // Skip denominator
@@ -639,6 +642,7 @@ namespace lsp
 
             bMidSide                = mid_side;
             bCustomLfo              = custom_lfo;
+            bMono                   = (pMono != NULL) ? pMono->value() >= 0.5f : false;
 
             // Update latency
             set_latency(latency);
@@ -813,6 +817,19 @@ namespace lsp
                     dsp::lramp1(c->vBuffer, fOldWetGain, fWetGain, to_do);
                     dsp::lramp_add2(c->vBuffer, vBuffer, fOldDryGain, fDryGain, to_do);
                     c->pOutLevel->set_value(dsp::abs_max(c->vBuffer, to_do));
+                }
+
+                // Apply mono compatibility switch
+                if ((nChannels > 1) && (bMono))
+                {
+                    dsp::lr_to_mid(vChannels[0].vBuffer, vChannels[0].vBuffer, vChannels[1].vBuffer, to_do);
+                    dsp::copy(vChannels[1].vBuffer, vChannels[0].vBuffer, to_do);
+                }
+
+                // Apply bypass and update buffer pointers
+                for (size_t nc=0; nc<nChannels; ++nc)
+                {
+                    channel_t *c            = &vChannels[nc];
 
                     // Apply bypass
                     c->sBypass.process(c->vOut, c->vIn, c->vBuffer, to_do);

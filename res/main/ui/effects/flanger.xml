@@ -21,7 +21,7 @@
 		<!-- Row 2: LFO settings -->
 		<cell cols="2">
 			<group text="labels.lfo">
-				<grid rows="3" cols="7">
+				<grid rows="3" cols="8">
 					<combo id="time" />
 					<label text="labels.tempo" />
 					<label text="labels.lfo.crossfade" />
@@ -29,6 +29,7 @@
 					<label text="labels.lfo.phase" />
 					<label text="labels.lfo.difference" visibility="ex :in_l" />
 					<label text="actions.reset" />
+					<label text="labels.signal.mono" visibility="ex :in_l" />
 					
 					<hbox>
 						<knob id="rate" visibility=":time ieq 0" />
@@ -52,6 +53,7 @@
 					<knob id="iphase" />
 					<knob id="dphase" visibility="ex :in_l" />
 					<button id="reset" size="32" />
+					<button id="mono" size="32" visibility="ex :in_l" />
 					
 					<hbox>
 						<value id="rate" visibility=":time ieq 0" />
@@ -72,6 +74,7 @@
 					<value id="iphase" />
 					<value id="dphase" visibility="ex :in_l" />
 					<void />
+					<void visibility="ex :in_l" />
 				</grid>
 			</group>
 		</cell>

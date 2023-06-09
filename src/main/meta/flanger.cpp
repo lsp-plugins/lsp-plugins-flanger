@@ -157,6 +157,7 @@ namespace lsp
 
             BYPASS,
 
+            SWITCH("mono", "Test for mono compatibility", 0),
             CONTROL("rate", "Rate", U_HZ, flanger::RATE),
             CONTROL("frac", "Time fraction", U_BAR, flanger::FRACTION),
             CONTROL("denom", "Time fraction denominator", U_BAR, flanger::DENOMINATOR),

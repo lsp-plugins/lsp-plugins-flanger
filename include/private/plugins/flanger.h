@@ -127,8 +127,10 @@ namespace lsp
                 float               fWetGain;           // Wet gain (processed signal)
                 bool                bMidSide;           // Mid/Side mode
                 bool                bCustomLfo;         // Custom LFO flag
+                bool                bMono;              // Mono compatibility test enabled
 
                 plug::IPort        *pBypass;            // Bypass
+                plug::IPort        *pMono;              // Mono compatibility test switch
                 plug::IPort        *pRate;              // Rate
                 plug::IPort        *pFraction;          // Fraction
                 plug::IPort        *pTempo;             // Tempo
