@@ -62,21 +62,21 @@ namespace lsp
 
         //---------------------------------------------------------------------
         // Implementation
-        flanger::lfo_func_t flanger::all_lfo_functions[] =
+        dspu::lfo::function_t flanger::all_lfo_functions[] =
         {
-            flanger::lfo_triangular,
-            flanger::lfo_sine,
-            flanger::lfo_step_sine,
-            flanger::lfo_cubic,
-            flanger::lfo_step_cubic,
-            flanger::lfo_parabolic,
-            flanger::lfo_rev_parabolic,
-            flanger::lfo_logarithmic,
-            flanger::lfo_rev_logarithmic,
-            flanger::lfo_sqrt,
-            flanger::lfo_rev_sqrt,
-            flanger::lfo_circular,
-            flanger::lfo_rev_circular,
+            dspu::lfo::triangular,
+            dspu::lfo::sine,
+            dspu::lfo::step_sine,
+            dspu::lfo::cubic,
+            dspu::lfo::step_cubic,
+            dspu::lfo::parabolic,
+            dspu::lfo::rev_parabolic,
+            dspu::lfo::logarithmic,
+            dspu::lfo::rev_logarithmic,
+            dspu::lfo::sqrt,
+            dspu::lfo::rev_sqrt,
+            dspu::lfo::circular,
+            dspu::lfo::rev_circular,
             NULL
         };
 
@@ -94,111 +94,6 @@ namespace lsp
             dspu::over_mode_t::OM_LANCZOS_8X16BIT,
             dspu::over_mode_t::OM_LANCZOS_8X24BIT
         };
-
-        float flanger::lfo_triangular(float phase)
-        {
-            return (phase < 0.5f) ? phase * 2.0f : (1.0f - phase) * 2.0f;
-        }
-
-        float flanger::lfo_sine(float phase)
-        {
-            return 0.5f - 0.5f * cosf(2.0f * M_PI * phase);
-        }
-
-        float flanger::lfo_step_sine(float phase)
-        {
-            if ((phase >= 0.25f) && (phase < 0.75f))
-            {
-                phase -= 0.25f;
-                return 0.75f - 0.25f * cosf(4.0f * M_PI * phase);
-            }
-
-            return 0.25f - 0.25f * cosf(4.0f * M_PI * phase);
-        }
-
-        float flanger::lfo_cubic(float phase)
-        {
-            if (phase >= 0.5f)
-                phase      = 1.0f - phase;
-
-            return phase * phase * (12.0f - 16.0f * phase);
-        }
-
-        float flanger::lfo_step_cubic(float phase)
-        {
-            if (phase >= 0.5f)
-                phase      = 1.0f - phase;
-
-            phase      -= 0.25f;
-            return 0.5f + 32.0f * phase * phase * phase;
-        }
-
-        float flanger::lfo_parabolic(float phase)
-        {
-            phase -= 0.5f;
-            return 1.0f - 4.0f * phase * phase;
-        }
-
-        float flanger::lfo_rev_parabolic(float phase)
-        {
-            if (phase >= 0.5f)
-                phase      = 1.0f - phase;
-
-            return 4.0f * phase * phase;
-        }
-
-        float flanger::lfo_logarithmic(float phase)
-        {
-            if (phase >= 0.5f)
-                phase      = 1.0f - phase;
-            return logf(1.0f + 198.0f *phase) * REV_LN100;
-        }
-
-        float flanger::lfo_rev_logarithmic(float phase)
-        {
-            if (phase >= 0.5f)
-                phase      = 1.0f - phase;
-            return 1.0f - logf(100.0f - 198.0f * phase) * REV_LN100;
-        }
-
-        float flanger::lfo_sqrt(float phase)
-        {
-            phase      -= 0.5f;
-            return sqrtf(1.0f - 4.0f * phase * phase);
-        }
-
-        float flanger::lfo_rev_sqrt(float phase)
-        {
-            if (phase >= 0.5f)
-                phase          -= 1.0f;
-            return 1.0f - sqrtf(1.0f - 4.0f * phase * phase);
-        }
-
-        float flanger::lfo_circular(float phase)
-        {
-            if (phase < 0.25f)
-                return 0.5f - sqrtf(0.25f - 4.0f * phase * phase);
-
-            if (phase > 0.75f)
-            {
-                phase          -= 1.0f;
-                return 0.5f - sqrtf(0.25f - 4.0f * phase * phase);
-            }
-
-            phase      -= 0.5f;
-            return 0.5f + sqrtf(0.25f - 4.0f * phase * phase);
-        }
-
-        float flanger::lfo_rev_circular(float phase)
-        {
-            if (phase >= 0.5f)
-                phase   = 1.0f - phase;
-
-            phase -= 0.25f;
-            return (phase < 0.0f) ?
-                sqrtf(0.25f - 4.0f * phase * phase) :
-                1.0f - sqrtf(0.25f - 4.0f * phase * phase);
-        }
 
         inline float flanger::lerp(float o_value, float n_value, float k)
         {
@@ -254,6 +149,7 @@ namespace lsp
             fWetGain        = 0.0f;
             bMidSide        = false;
             bCustomLfo      = false;
+            bMono           = false;
 
             pBypass         = NULL;
             pMono           = NULL;

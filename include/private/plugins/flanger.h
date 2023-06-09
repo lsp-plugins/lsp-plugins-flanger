@@ -22,11 +22,12 @@
 #ifndef PRIVATE_PLUGINS_FLANGER_H_
 #define PRIVATE_PLUGINS_FLANGER_H_
 
+#include <lsp-plug.in/dsp-units/ctl/Bypass.h>
+#include <lsp-plug.in/dsp-units/ctl/Toggle.h>
+#include <lsp-plug.in/dsp-units/misc/lfo.h>
 #include <lsp-plug.in/dsp-units/util/Delay.h>
 #include <lsp-plug.in/dsp-units/util/RingBuffer.h>
 #include <lsp-plug.in/dsp-units/util/Oversampler.h>
-#include <lsp-plug.in/dsp-units/ctl/Bypass.h>
-#include <lsp-plug.in/dsp-units/ctl/Toggle.h>
 #include <lsp-plug.in/plug-fw/core/IDBuffer.h>
 #include <lsp-plug.in/plug-fw/plug.h>
 
@@ -46,7 +47,6 @@ namespace lsp
                 flanger (const flanger &);
 
             protected:
-                typedef float (*lfo_func_t)(float phase);
                 typedef float (*mix_func_t)(float o_value, float n_value, float k);
 
                 struct channel_t;
@@ -54,45 +54,45 @@ namespace lsp
                 typedef struct channel_t
                 {
                     // DSP processing modules
-                    dspu::Bypass        sBypass;            // Bypass
-                    dspu::Delay         sDelay;             // Delay for dry signal
-                    dspu::RingBuffer    sRing;              // Ring buffer for flanger effect processing
-                    dspu::RingBuffer    sFeedback;          // Feedback delay buffer
-                    dspu::Oversampler   sOversampler;       // Oversampler
+                    dspu::Bypass            sBypass;            // Bypass
+                    dspu::Delay             sDelay;             // Delay for dry signal
+                    dspu::RingBuffer        sRing;              // Ring buffer for flanger effect processing
+                    dspu::RingBuffer        sFeedback;          // Feedback delay buffer
+                    dspu::Oversampler       sOversampler;       // Oversampler
 
                     // Parameters
-                    uint32_t            nOldPhaseShift;     // Old phase shift
-                    uint32_t            nPhaseShift;        // Phase shift
-                    size_t              nLfoType;           // Type of LFO
-                    size_t              nLfoPeriod;         // LFO period
-                    float               fLfoArg[2];         // LFO function coefficients (multiplier, adder)
-                    lfo_func_t          pLfoFunc;           // LFO function
-                    float               fOutPhase;          // Output phase for drawing
-                    float               fOutShift;          // Output shift for drawing
-                    bool                bSyncLfo;           // Synchronize LFO graph
+                    uint32_t                nOldPhaseShift;     // Old phase shift
+                    uint32_t                nPhaseShift;        // Phase shift
+                    size_t                  nLfoType;           // Type of LFO
+                    size_t                  nLfoPeriod;         // LFO period
+                    float                   fLfoArg[2];         // LFO function coefficients (multiplier, adder)
+                    dspu::lfo::function_t   pLfoFunc;           // LFO function
+                    float                   fOutPhase;          // Output phase for drawing
+                    float                   fOutShift;          // Output shift for drawing
+                    bool                    bSyncLfo;           // Synchronize LFO graph
 
-                    float              *vIn;                // Input buffer
-                    float              *vOut;               // Output buffer
-                    float              *vBuffer;            // Processed signal
-                    float              *vLfoMesh;           // LFO mesh amplitude data
+                    float                   *vIn;                // Input buffer
+                    float                   *vOut;               // Output buffer
+                    float                   *vBuffer;            // Processed signal
+                    float                   *vLfoMesh;           // LFO mesh amplitude data
 
                     // Input ports
-                    plug::IPort        *pIn;                // Input port
-                    plug::IPort        *pOut;               // Output port
+                    plug::IPort             *pIn;                // Input port
+                    plug::IPort             *pOut;               // Output port
 
                     // Output ports
-                    plug::IPort        *pPhase;             // Current phase
-                    plug::IPort        *pLfoType;           // Oscillator type
-                    plug::IPort        *pLfoPeriod;         // Oscillator period
-                    plug::IPort        *pLfoShift;          // LFO shift
-                    plug::IPort        *pLfoMesh;           // LFO mesh
-                    plug::IPort        *pInLevel;           // Input signal level
-                    plug::IPort        *pOutLevel;          // Output signal level
+                    plug::IPort             *pPhase;             // Current phase
+                    plug::IPort             *pLfoType;           // Oscillator type
+                    plug::IPort             *pLfoPeriod;         // Oscillator period
+                    plug::IPort             *pLfoShift;          // LFO shift
+                    plug::IPort             *pLfoMesh;           // LFO mesh
+                    plug::IPort             *pInLevel;           // Input signal level
+                    plug::IPort             *pOutLevel;          // Output signal level
                 } channel_t;
 
             protected:
-                static lfo_func_t           all_lfo_functions[];
-                static dspu::over_mode_t    all_oversampling_modes[];
+                static dspu::lfo::function_t    all_lfo_functions[];
+                static dspu::over_mode_t        all_oversampling_modes[];
 
             protected:
                 dspu::Toggle        sReset;             // Reset toggle
@@ -162,22 +162,6 @@ namespace lsp
                 uint8_t            *pData;              // Allocated data
 
             protected:
-                static float        lfo_triangular(float phase);
-                static float        lfo_sawtooth(float phase);
-                static float        lfo_rev_sawtooth(float phase);
-                static float        lfo_sine(float phase);
-                static float        lfo_step_sine(float phase);
-                static float        lfo_cubic(float phase);
-                static float        lfo_step_cubic(float phase);
-                static float        lfo_parabolic(float phase);
-                static float        lfo_rev_parabolic(float phase);
-                static float        lfo_logarithmic(float phase);
-                static float        lfo_rev_logarithmic(float phase);
-                static float        lfo_sqrt(float phase);
-                static float        lfo_rev_sqrt(float phase);
-                static float        lfo_circular(float phase);
-                static float        lfo_rev_circular(float phase);
-
                 static inline uint32_t  phase_to_int(float phase);
                 static inline float     lerp(float o_value, float n_value, float k);
                 static inline float     qlerp(float o_value, float n_value, float k);
