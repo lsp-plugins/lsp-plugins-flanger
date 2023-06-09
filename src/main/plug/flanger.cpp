@@ -900,7 +900,111 @@ namespace lsp
 
         void flanger::dump(dspu::IStateDumper *v) const
         {
-            // TODO
+            v->write_object("sReset", &sReset);
+
+            v->write("nChannels", nChannels);
+            {
+                v->begin_array("vChannels", vChannels, nChannels);
+                lsp_finally { v->end_array(); };
+                for (size_t i=0; i<nChannels; ++i)
+                {
+                    channel_t *c        = &vChannels[i];
+
+                    v->begin_object(c, sizeof(channel_t));
+                    lsp_finally { v->end_object(); };
+
+                    v->write_object("sBypass", &c->sBypass);
+                    v->write_object("sDelay", &c->sDelay);
+                    v->write_object("sRing", &c->sRing);
+                    v->write_object("sFeedback", &c->sFeedback);
+                    v->write_object("sOversampler", &c->sOversampler);
+
+                    v->write("nOldPhaseShift", c->nOldPhaseShift);
+                    v->write("nPhaseShift", c->nPhaseShift);
+                    v->write("nLfoType", c->nLfoType);
+                    v->write("nLfoPeriod", c->nLfoPeriod);
+                    v->writev("fLfoArg", c->fLfoArg, 2);
+                    v->write("pLfoFunc", c->pLfoFunc);
+                    v->write("fOutPhase", c->fOutPhase);
+                    v->write("fOutShift", c->fOutShift);
+                    v->write("bSyncLfo", c->bSyncLfo);
+
+                    v->write("vIn", c->vIn);
+                    v->write("vOut", c->vOut);
+                    v->write("vBuffer", c->vBuffer);
+                    v->write("vLfoMesh", c->vLfoMesh);
+
+                    v->write("pIn", c->pIn);
+                    v->write("pOut", c->pOut);
+
+                    v->write("pPhase", c->pPhase);
+                    v->write("pLfoType", c->pLfoType);
+                    v->write("pLfoPeriod", c->pLfoPeriod);
+                    v->write("pLfoShift", c->pLfoShift);
+                    v->write("pLfoMesh", c->pLfoMesh);
+                    v->write("pInLevel", c->pInLevel);
+                    v->write("pOutLevel", c->pOutLevel);
+                }
+            }
+
+            v->write("vBuffer", vBuffer);
+            v->write("vLfoPhase", vLfoPhase);
+            v->write("nOldDepthMin", nOldDepthMin);
+            v->write("nDepthMin", nDepthMin);
+            v->write("nOldDepth", nOldDepth);
+            v->write("nDepth", nDepth);
+            v->write("nInitPhase", nInitPhase);
+            v->write("nPhase", nPhase);
+            v->write("nOldPhaseStep", nOldPhaseStep);
+            v->write("nPhaseStep", nPhaseStep);
+            v->write("nCrossfade", nCrossfade);
+            v->write("fCrossfade", fCrossfade);
+            v->write("pCrossfadeFunc", pCrossfadeFunc);
+            v->write("fOldAmount", fOldAmount);
+            v->write("fAmount", fAmount);
+            v->write("fOldFeedGain", fOldFeedGain);
+            v->write("fFeedGain", fFeedGain);
+            v->write("nOldFeedDelay", nOldFeedDelay);
+            v->write("nFeedDelay", nFeedDelay);
+            v->write("fOldInGain", fOldInGain);
+            v->write("fInGain", fInGain);
+            v->write("fOldDryGain", fOldDryGain);
+            v->write("fDryGain", fDryGain);
+            v->write("fOldWetGain", fOldWetGain);
+            v->write("fWetGain", fWetGain);
+            v->write("bMidSide", bMidSide);
+            v->write("bCustomLfo", bCustomLfo);
+            v->write("bMono", bMono);
+
+            v->write("pBypass", pBypass);
+            v->write("pMono", pMono);
+            v->write("pRate", pRate);
+            v->write("pFraction", pFraction);
+            v->write("pTempo", pTempo);
+            v->write("pTempoSync", pTempoSync);
+            v->write("pTimeMode", pTimeMode);
+            v->write("pCrossfade", pCrossfade);
+            v->write("pCrossfadeType", pCrossfadeType);
+            v->write("pInitPhase", pInitPhase);
+            v->write("pPhaseDiff", pPhaseDiff);
+            v->write("pReset", pReset);
+            v->write("pMsSwitch", pMsSwitch);
+            v->write("pDepthMin", pDepthMin);
+            v->write("pDepth", pDepth);
+            v->write("pSignalPhase", pSignalPhase);
+            v->write("pAmount", pAmount);
+            v->write("pOversampling", pOversampling);
+            v->write("pFeedOn", pFeedOn);
+            v->write("pFeedGain", pFeedGain);
+            v->write("pFeedDelay", pFeedDelay);
+            v->write("pFeedPhase", pFeedPhase);
+            v->write("pInGain", pInGain);
+            v->write("pDry", pDry);
+            v->write("pWet", pWet);
+            v->write("pOutGain", pOutGain);
+
+            v->write("pIDisplay", pIDisplay);
+            v->write("pData", pData);
         }
 
     } /* namespace plugins */
