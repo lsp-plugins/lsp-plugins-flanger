@@ -36,42 +36,42 @@ namespace lsp
             static constexpr float  DEPTH_MIN_MIN       = 0.0f;
             static constexpr float  DEPTH_MIN_MAX       = 10.0f;
             static constexpr float  DEPTH_MIN_DFL       = 0.1f;
-            static constexpr float  DEPTH_MIN_STEP      = 0.05f;
+            static constexpr float  DEPTH_MIN_STEP      = 0.003f;
 
             static constexpr float  DEPTH_MIN           = 0.1f;
             static constexpr float  DEPTH_MAX           = 20.0f;
             static constexpr float  DEPTH_DFL           = 2.0f;
-            static constexpr float  DEPTH_STEP          = 0.05f;
+            static constexpr float  DEPTH_STEP          = 0.005f;
 
             static constexpr float  SHIFT_MIN           = 0.0f;
             static constexpr float  SHIFT_MAX           = 1.0f;
             static constexpr float  SHIFT_DFL           = 0.0f;
-            static constexpr float  SHIFT_STEP          = 0.01f;
+            static constexpr float  SHIFT_STEP          = 0.04f;
 
             static constexpr float  PHASE_MIN           = 0.0f;
             static constexpr float  PHASE_MAX           = 360.0f;
             static constexpr float  PHASE_DFL           = 0.0f;
-            static constexpr float  PHASE_STEP          = 0.5f;
+            static constexpr float  PHASE_STEP          = 0.04f;
 
             static constexpr float  RATE_MIN            = 0.01f;
             static constexpr float  RATE_MAX            = 20.0f;
             static constexpr float  RATE_DFL            = 0.25f;
-            static constexpr float  RATE_STEP           = 0.01f;
+            static constexpr float  RATE_STEP           = 0.005f;
 
             static constexpr float  CROSSFADE_MIN       = 0.0f;
             static constexpr float  CROSSFADE_MAX       = 50.0f;
             static constexpr float  CROSSFADE_DFL       = 0.0f;
-            static constexpr float  CROSSFADE_STEP      = 0.1f;
+            static constexpr float  CROSSFADE_STEP      = 0.015f;
 
             static constexpr float  FEEDBACK_GAIN_MIN   = 0.0f;
             static constexpr float  FEEDBACK_GAIN_MAX   = 0.891250938134f; // -1 dB
             static constexpr float  FEEDBACK_GAIN_DFL   = GAIN_AMP_M_6_DB;
-            static constexpr float  FEEDBACK_GAIN_STEP  = 0.01f;
+            static constexpr float  FEEDBACK_GAIN_STEP  = 0.015f;
 
             static constexpr float  FEEDBACK_DELAY_MIN  = 0.0f;
             static constexpr float  FEEDBACK_DELAY_MAX  = 5.0f;
             static constexpr float  FEEDBACK_DELAY_DFL  = 0.0f;
-            static constexpr float  FEEDBACK_DELAY_STEP = 0.01f;
+            static constexpr float  FEEDBACK_DELAY_STEP = 0.001f;
 
             static constexpr float  TEMPO_MIN           = 20.0f;
             static constexpr float  TEMPO_MAX           = 360.0f;

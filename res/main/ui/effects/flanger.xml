@@ -1,229 +1,321 @@
 <plugin resizable="true">
-	<grid rows="5" cols="3" spacing="4">
-		<!-- Row 1: input meter -->
-		<label text="labels.chan.in" />
-		<cell cols="2" hexpand="true">
-			<!-- Mono meter for mono version -->
-			<ui:if test="ex :in">
-				<ledmeter hexpand="true" angle="0" bg.inherit="true">
-					<ledchannel id="min" min="-36 db" max="+6 db" log="true" type="rms_peak" peak.visibility="true" value.color="mid_in"/>
-				</ledmeter>
-			</ui:if>
-			<!-- Stereo meter for stereo version -->
-			<ui:if test="ex :in_l">
-				<ledmeter hexpand="true" angle="0" bg.inherit="true">
-					<ledchannel id="min_l" min="-36 db" max="+6 db" log="true" type="rms_peak" peak.visibility="true" value.color="left_in"/>
-					<ledchannel id="min_r" min="-36 db" max="+6 db" log="true" type="rms_peak" peak.visibility="true" value.color="right_in"/>
-				</ledmeter>
-			</ui:if>
-		</cell>
-		
-		<!-- Row 2: LFO settings -->
-		<cell cols="2">
-			<group text="labels.lfo">
-				<grid rows="3" cols="8">
-					<combo id="time" />
-					<label text="labels.tempo" />
-					<label text="labels.lfo.crossfade" />
-					<label text="labels.lfo.type" />
-					<label text="labels.lfo.phase" />
-					<label text="labels.lfo.difference" visibility="ex :in_l" />
-					<label text="actions.reset" />
-					<label text="labels.signal.mono" visibility="ex :in_l" />
-					
-					<hbox>
-						<knob id="rate" visibility=":time ieq 0" />
-						<frac id="frac" den.id="denom" max="8" color="green" visibility=":time ieq 1" />
-					</hbox>
-					<hbox>
-						<knob id="tempo" visibility="!:sync" pad="0"/>
-						<indicator id="_time_bpm" format="f4.1!" pad="0" visibility=":sync" text_color="green"/>
-					</hbox>
-					<vbox>
-						<combo id="xtype" />
+	<hbox spacing="4">
+		<!-- LFO -->
+		<group text="labels.lfo" hexpand="true" ipadding="0">
+			<grid rows="13" cols="3" transpose="true">
+				<cell cols="3">
+					<hbox hfill="true" pad.v="4" pad.h="6">
+					<button id="reset" width.min="113" text="actions.restart" hfill="true" ui:inject="Button_yellow" height="19" />
+					<button id="mono" width.min="113" text="labels.signal.mono" hfill="true" pad.l="6" ui:inject="Button_mono" height="19" visibility="ex :in_l" />
+				</hbox>
+			</cell>
+				<cell cols="3"><hsep pad.v="2" bg.color="bg" vreduce="true"/></cell>
+				<!-- Rate -->
+				<void vexpand="true"/>
+				<combo id="time" fill="false" pad.h="6" pad.v="4" width="108"/>
+				<vbox>
+				<hbox fill="false" pad.b="4" width="108" visibility=":time ieq 0">
+					<align halign="-1">
+						<knob id="rate" />
+					</align>
+					<value id="rate" width="52" sline="true" />
+				</hbox>
+				<hbox fill="false" pad.b="4" width="108" visibility=":time ieq 1">
+					<align halign="-1">
+					<frac id="frac" pad.r="6" pad.b="2" pad.t="3" den.id="denom" max="8" color="green"/>
+				</align >
+					<value id="frac" width="52" sline="true" />
+				</hbox>
+			</vbox>
+				<void vexpand="true"/>
+        <cell cols="3"><hsep pad.v="2" bg.color="bg" vreduce="true"/></cell>
+				<!-- Crossfade -->
+				<void vexpand="true"/>
+				<hbox fill="false" pad.t="4" width="108">
+					<align halign="-1">
 						<knob id="xfade" />
+						</align>
+					<vbox>
+						<label text="labels.lfo.crossfade" />
+						<value id="xfade" same_line="true"/>
 					</vbox>
-					<grid rows="2" cols="2">
-						<combo id="type" />
-						<combo id="period" />
-						
-						<combo id="atype" visibility="ex :in_l" />
-						<combo id="aperiod" visibility="ex :in_l" />
-					</grid>
-					<knob id="iphase" />
-					<knob id="dphase" visibility="ex :in_l" />
-					<button id="reset" size="32" />
-					<button id="mono" size="32" visibility="ex :in_l" />
-					
-					<hbox>
-						<value id="rate" visibility=":time ieq 0" />
-						<value id="frac" visibility=":time ieq 1" />
+				</hbox>
+				<combo id="xtype" fill="false" pad.h="6" pad.b="4" width="108"/>
+				<void vexpand="true"/>
+        <cell cols="3"><hsep pad.v="2" bg.color="bg" vreduce="true"/></cell>
+				<!-- Type -->
+				<cell cols="3">
+					<grid rows="3" cols="1">
+							<label text="labels.lfo.type" pad.v="4"/>
+							<hbox pad.h="6" pad.b="4">
+						<combo id="type" hfill="true" />
+						<combo id="period" hfill="true" pad.l="6"/>
 					</hbox>
-					<grid rows="2" cols="2">
-						<cell cols="2">
-							<hbox>
-								<label text="labels.host_bpm" visibility=":sync"/>
-								<value id="tempo" same_line="true" visibility="!:sync"/>
-							</hbox>
-						</cell>
-						<button id="sync" text="labels.sync" ui:inject="Button_green"/>
-						<ttap id="tempo" text="actions.tap" tcolor="label_text" visibility="!:sync"/>
+						<hbox pad.h="6" pad.b="4">
+						<combo id="atype" hfill="true" visibility="ex :in_l" />
+						<combo id="aperiod" hfill="true" visibility="ex :in_l" pad.l="6" />
+						</hbox>
 					</grid>
-					<value id="xfade" />
-					<void />
-					<value id="iphase" />
-					<value id="dphase" visibility="ex :in_l" />
-					<void />
-					<void visibility="ex :in_l" />
-				</grid>
-			</group>
-		</cell>
-		
-		<!-- Row 2: LFO graph -->
-		<cell rows="3">
-			<graph width.min="320" height.min="320">
-				<origin hpos="-1" vpos="1" visibility="false" />
-				
-				<!-- Grid -->
-				<ui:with color="graph_alt_2">
-					<marker v="45" />
-					<marker v="135" />
-					<marker v="225" />
-					<marker v="315" />
-					<marker v="0.125" ox="1" oy="0" />
-					<marker v="0.375" ox="1" oy="0" />
-					<marker v="0.625" ox="1" oy="0" />
-					<marker v="0.875" ox="1" oy="0" />
-				</ui:with>
+					</cell>
+					<cell rows="4"><vsep pad.h="2" bg.color="bg" hreduce="true"/></cell>
+					<cell rows="4"><vsep pad.h="2" bg.color="bg" hreduce="true"/></cell>
+					<!-- Tempo -->
+					<void vexpand="true"/>
+					<cell rows="2">
+						<vbox fill="false" pad.v="4">
 
-				<ui:with color="graph_alt_1">
-					<marker v="90" />
-					<marker v="270" />
-					<marker v="0.25" ox="1" oy="0" />
-					<marker v="0.75" ox="1" oy="0" />
-				</ui:with>
+							<hbox height="41"  fill="false" visibility="!:sync">
+								<knob id="tempo" pad.r="6" />
+								<vbox fill="false">
+									<label text="labels.tempo" />
+									<value id="tempo" width.min="48" same_line="true"/>
+								</vbox>
+							</hbox>
 
-				<ui:with color="graph_sec">
-					<marker v="180" />
-					<marker v="0.5" ox="1" oy="0" />
-				</ui:with>
-				
-				<ui:with color="graph_prim">
-					<marker v="360" />
-					<marker v="1" ox="1" oy="0" />
-				</ui:with>
-				
-				<!-- Axes -->
-				<axis min="0" max="360" angle="1.5"/>
-				<axis min="0" max="1" angle="0"/>
-				
-				<!-- Mesh -->
-				<mesh id="lfo" width="3" color="graph_mesh" smooth="true" visibility="(!ex :atype) or (:atype ieq 0)"/>
-				<mesh id="lfo" width="3" color="(ex :ms and :ms) ? 'mid' : 'left'" smooth="true" visibility="(ex :atype) and (:atype ine 0)"/>
-				<mesh id="alfo" width="3" color="(ex :ms and :ms) ? 'side' : 'right'" smooth="true" visibility="(ex :atype) and (:atype ine 0)"/>
-				
-				<!-- Dots and markers -->
-				<marker v="360.0 - 3.6*:xfade" color="graph_marker" />
-				
-				<ui:if test="!(ex :in_r)">
-					<marker v=":clsh" ox="1" oy="0" color="graph_mesh" />
-					<dot x.id="clph" y.id="clsh" color="graph_mesh" bcolor="graph_mesh"/>
-				</ui:if>
-				<ui:if test="ex :in_r">
-					<marker v=":clsh_l" ox="1" oy="0" color="(:ms) ? 'mid' : 'left'" />
-					<marker v=":clsh_r" ox="1" oy="0" color="(:ms) ? 'side' : 'right'" />
-					
-					<dot x.id="clph_l" y.id="clsh_l" color="(:ms) ? 'mid' : 'left'" bcolor="(:ms) ? 'mid' : 'left'"/>
-					<dot x.id="clph_r" y.id="clsh_r" color="(:ms) ? 'side' : 'right" bcolor="(:ms) ? 'side' : 'right'"/>
-				</ui:if>
-				
-				<!-- text -->
-				<text x="0" y="0" halign="1" valign="-1" text="graph.values.min" />
-				<text x="0" y="1" halign="-1" valign="-1" text="graph.values.max" />
-				<text x="0" y="0.5" halign="0" valign="-1" text="graph.axis.depth" />
-				<ui:for id="i" first="1" count="7">
-					<text x="${:i*45}" y="0" halign="1" valign="1" text="graph.values.x:deg" text:value="${:i*45}" />
-				</ui:for>
-				<text x="360" y="0" halign="1" valign="1" text="graph.axis.phase" />
-				
-				<text x="360.0 - 3.6*:xfade" y="1" halign="-1" valign="1" text="labels.lfo.crossfade" color="graph_marker" />
-			</graph>
-		</cell>
-		
-		<!-- Row 3: effect settings -->
-		<cell cols="2">
-			<group text="labels.controls">
-				<grid rows="3" cols="9">
-					<label text="labels.chan.mid_side" visibility="ex :in_l" />
+							<vbox fill="false"  visibility=":sync">
+								<indicator id="_time_bpm" format="f4.1!" pad="0"  text_color="green"/>
+								<hbox pad.t="1" fill="false">
+									<label text="labels.tempo"/>
+									<label pad.l="6" text="labels.host_bpm" />
+								</hbox>
+							</vbox>
+
+							<hbox pad.t="4" >
+							<button id="sync" text="labels.sync" fill="true" ui:inject="Button_green"/>
+							<ttap id="tempo" text="actions.tap" pad.l="6" fill="true" tcolor="label_text" visibility="!:sync"/>
+						</hbox>
+
+						</vbox>
+					</cell>
+					<void vexpand="true"/>
+					<!-- Phase Difference -->
+					<void vexpand="true"/>
+					<cell rows="2">
+						<vbox fill="false">
+						<hbox fill="false" visibility="ex :in_l" pad.h="6" pad.v="4">
+							<vbox fill="false">
+								<knob pad.l="1" id="iphase"/>
+								<label width="54" text="labels.lfo.phase"/>
+								<value id="iphase" same_line="true"/>
+							</vbox>
+							<vbox fill="false" >
+								<knob pad.l="1" fill="false" id="dphase"/>
+								<label width="54" text="labels.lfo.difference"/>
+								<value id="dphase" same_line="true"/>
+							</vbox>
+						</hbox>
+						<hbox fill="false" visibility="ex :in">
+							<knob id="iphase" pad.h="6"/>
+							<vbox fill="false" pad.r="6">
+								<label text="labels.lfo.phase" />
+							<value id="iphase" same_line="true"/>
+						</vbox>
+						</hbox>
+					</vbox>
+					</cell>
+					<void vexpand="true"/>
+			</grid>
+		</group>
+
+	<!-- Mono meter for mono version -->
+	<ui:if test="ex :in">
+		<ledmeter angle="1" bg.inherit="true">
+			<ledchannel id="min" min="-36 db" max="+6 db" log="true" type="rms_peak" peak.visibility="true" value.color="mid_in"/>
+		</ledmeter>
+	</ui:if>
+	<!-- Stereo meter for stereo version -->
+	<ui:if test="ex :in_l">
+		<ledmeter angle="1" bg.inherit="true">
+			<ledchannel id="min_l" min="-36 db" max="+6 db" log="true" type="rms_peak" peak.visibility="true" value.color="left_in"/>
+			<ledchannel id="min_r" min="-36 db" max="+6 db" log="true" type="rms_peak" peak.visibility="true" value.color="right_in"/>
+		</ledmeter>
+	</ui:if>
+	<vbox>
+		<!-- graph -->
+		<graph width.min="200" expand="true" height.min="200">
+			<origin hpos="-1" vpos="1" visibility="false" />
+
+			<!-- Grid -->
+			<ui:with color="graph_alt_2">
+				<marker v="45" />
+				<marker v="135" />
+				<marker v="225" />
+				<marker v="315" />
+				<marker v="0.125" ox="1" oy="0" />
+				<marker v="0.375" ox="1" oy="0" />
+				<marker v="0.625" ox="1" oy="0" />
+				<marker v="0.875" ox="1" oy="0" />
+			</ui:with>
+
+			<ui:with color="graph_alt_1">
+				<marker v="90" />
+				<marker v="270" />
+				<marker v="0.25" ox="1" oy="0" />
+				<marker v="0.75" ox="1" oy="0" />
+			</ui:with>
+
+			<ui:with color="graph_sec">
+				<marker v="180" />
+				<marker v="0.5" ox="1" oy="0" />
+			</ui:with>
+
+			<ui:with color="graph_prim">
+				<marker v="360" />
+				<marker v="1" ox="1" oy="0" />
+			</ui:with>
+
+			<!-- Axes -->
+			<axis min="0" max="360" angle="1.5"/>
+			<axis min="0" max="1" angle="0"/>
+
+			<!-- Mesh -->
+			<mesh id="lfo" width="3" color="graph_mesh" smooth="true" visibility="(!ex :atype) or (:atype ieq 0)"/>
+			<mesh id="lfo" width="3" color="(ex :ms and :ms) ? 'mid' : 'left'" smooth="true" visibility="(ex :atype) and (:atype ine 0)"/>
+			<mesh id="alfo" width="3" color="(ex :ms and :ms) ? 'side' : 'right'" smooth="true" visibility="(ex :atype) and (:atype ine 0)"/>
+
+			<!-- Dots and markers -->
+			<marker v="360.0 - 3.6*:xfade" color="graph_marker" />
+
+			<ui:if test="!(ex :in_r)">
+				<marker v=":clsh" ox="1" oy="0" color="graph_mesh" />
+				<dot x.id="clph" y.id="clsh" color="graph_mesh" bcolor="graph_mesh"/>
+			</ui:if>
+			<ui:if test="ex :in_r">
+				<marker v=":clsh_l" ox="1" oy="0" color="(:ms) ? 'mid' : 'left'" />
+				<marker v=":clsh_r" ox="1" oy="0" color="(:ms) ? 'side' : 'right'" />
+
+				<dot x.id="clph_l" y.id="clsh_l" color="(:ms) ? 'mid' : 'left'" bcolor="(:ms) ? 'mid' : 'left'"/>
+				<dot x.id="clph_r" y.id="clsh_r" color="(:ms) ? 'side' : 'right" bcolor="(:ms) ? 'side' : 'right'"/>
+			</ui:if>
+
+			<!-- text -->
+			<text x="0" y="0" halign="1" valign="-1" text="graph.values.min" />
+			<text x="0" y="1" halign="-1" valign="-1" text="graph.values.max" />
+			<text x="0" y="0.5" halign="0" valign="-1" text="graph.axis.depth" />
+			<ui:for id="i" first="1" count="7">
+				<text x="${:i*45}" y="0" halign="1" valign="1" text="graph.values.x:deg" text:value="${:i*45}" />
+			</ui:for>
+			<text x="360" y="0" halign="1" valign="1" text="graph.axis.phase" />
+
+			<text x="360.0 - 3.6*:xfade" y="1" halign="-1" valign="1" text="labels.lfo.crossfade" color="graph_marker" />
+		</graph>
+
+		<!-- signal -->
+
+		<group hexpand="true" text="groups.signal">
+			<grid rows="3" cols="4">
+				<label text="labels.chan.input" />
+				<label text="labels.signal.dry" />
+				<label text="labels.signal.wet" />
+				<label text="labels.chan.output" />
+
+				<knob id="g_in" pad.h="6" pad.v="4"/>
+				<knob id="dry" scolor="dry" pad.h="6" pad.v="4"/>
+				<knob id="wet" scolor="wet" pad.h="6" pad.v="4"/>
+				<knob id="g_out" pad.h="6" pad.v="4"/>
+
+				<value id="g_in" />
+				<value id="dry" />
+				<value id="wet" />
+				<value id="g_out" />
+			</grid>
+		</group>
+	</vbox>
+
+	<!-- Mono meter for mono version -->
+	<ui:if test="ex :in">
+		<ledmeter angle="1" bg.inherit="true">
+			<ledchannel id="mout" min="-36 db" max="+6 db" log="true" type="rms_peak" peak.visibility="true" value.color="mid"/>
+		</ledmeter>
+	</ui:if>
+	<!-- Stereo meter for stereo version -->
+	<ui:if test="ex :in_l">
+		<ledmeter angle="1" bg.inherit="true">
+			<ledchannel id="mout_l" min="-36 db" max="+6 db" log="true" type="rms_peak" peak.visibility="true" value.color="left"/>
+			<ledchannel id="mout_r" min="-36 db" max="+6 db" log="true" type="rms_peak" peak.visibility="true" value.color="right"/>
+		</ledmeter>
+	</ui:if>
+
+	<!-- Controls -->
+	<group text="labels.controls" hexpand="true" ipadding="0">
+		<grid rows="17" cols="2" >
+			<!-- mid/side -->
+			<cell cols="2">
+				<vbox >
+					<void visibility="ex :in"/>
+				<button id="ms" text="labels.chan.mid_side" hfill="true" pad.v="4" pad.h="6" ui:inject="Button_mid" height="19" visibility="ex :in_l"/>
+				<hsep pad.v="2" bg.color="bg" vreduce="true" visibility="ex :in_l"/>
+			</vbox>
+			</cell>
+			<!-- depth -->
+			<cell cols="2"><void vexpand="true"/></cell>
+			<align halign="1">
+			<hbox fill="false" pad.v="4" pad.l="6" pad.r="12" >
+				<knob id="dmin" pad.r="6"/>
+				<vbox>
 					<label text="labels.depth.min" />
+					<value id="dmin" same_line="true"/>
+				</vbox>
+			</hbox></align>
+			<align halign="-1">
+			<hbox fill="false" pad.v="4" pad.l="6" pad.r="6" >
+				<knob id="depth" pad.r="6"/>
+				<vbox>
 					<label text="labels.depth" />
-					<label text="labels.oversampling" />
-					<label text="labels.signal.phase" />
-					<label text="labels.amount" />
-					<button id="fb_on" text="labels.feedback" />
-					<label text="labels.delay" />
-					<label text="labels.signal.phase" />
-					
-					<button id="ms" size="32" visibility="ex :in_l" />
-					<knob id="dmin" />
-					<knob id="depth" />
-					<combo id="ovs" />
-					<button id="sphase" size="32" />
-					<knob id="amount" />
-					<knob id="fgain" />
-					<knob id="fdelay" />
-					<button id="fphase" size="32" />
-					
-					<void visibility="ex :in_l" />
-					<value id="dmin" />
-					<value id="depth" />
-					<void />
-					<void />
-					<value id="amount" />
-					<value id="fgain" />
-					<value id="fdelay" />
-					<void />
-				</grid>
-			</group>
-		</cell>
-		
-		<cell cols="2">
-			<group text="labels.signal">
-				<grid rows="3" cols="4">
-					<label text="labels.chan.input" />
-					<label text="labels.signal.dry" />
-					<label text="labels.signal.wet" />
-					<label text="labels.chan.output" />
-					
-					<knob id="g_in" pad.h="6" pad.v="4"/>
-					<knob id="dry" scolor="dry" pad.h="6" pad.v="4"/>
-					<knob id="wet" scolor="wet" pad.h="6" pad.v="4"/>
-					<knob id="g_out" pad.h="6" pad.v="4"/>
-					
-					<value id="g_in" />
-					<value id="dry" />
-					<value id="wet" />
-					<value id="g_out" />
-				</grid>
-			</group>
-		</cell>
-		
-		<!-- Row 4 -->
-		<label text="labels.chan.out" />
-		<cell cols="2" hexpand="true">
-			<!-- Mono meter for mono version -->
-			<ui:if test="ex :out">
-				<ledmeter hexpand="true" angle="0" bg.inherit="true">
-					<ledchannel id="mout" min="-36 db" max="+6 db" log="true" type="rms_peak" peak.visibility="true" value.color="mid"/>
-				</ledmeter>
-			</ui:if>
-			<!-- Stereo meter for stereo version -->
-			<ui:if test="ex :out_l">
-				<ledmeter hexpand="true" angle="0" bg.inherit="true">
-					<ledchannel id="mout_l" min="-36 db" max="+6 db" log="true" type="rms_peak" peak.visibility="true" value.color="left"/>
-					<ledchannel id="mout_r" min="-36 db" max="+6 db" log="true" type="rms_peak" peak.visibility="true" value.color="right"/>
-				</ledmeter>
-			</ui:if>
-		</cell>
-	</grid>
+					<value id="depth" width="48" same_line="true"/>
+				</vbox>
+			</hbox></align>
+			<cell cols="2"><void vexpand="true"/></cell>
+				<cell cols="2"><hsep pad.v="2" bg.color="bg" vreduce="true"/></cell>
+				<!-- oversampling -->
+				<cell cols="2"><void vexpand="true"/></cell>
+				<cell cols="2">
+					<vbox pad.v="4" pad.h="6">
+						<label text="labels.oversampling" pad.b="4"/>
+						<combo id="ovs"/>
+					</vbox>
+				</cell>
+				<cell cols="2"><void vexpand="true"/></cell>
+				<cell cols="2"><hsep pad.v="2" bg.color="bg" vreduce="true"/></cell>
+				<!-- phase amount -->
+				<cell cols="2"><void vexpand="true"/></cell>
+					<align halign="1"><button id="sphase" text="labels.signal.phase" fill="false" pad.v="4" pad.h="6" ui:inject="Button_orange"  width="101" height="34" /></align>
+					<align halign="-11"><hbox fill="false" pad.v="4" pad.h="6">
+						<knob id="amount" pad.r="6"/>
+						<vbox>
+							<label text="labels.amount" />
+							<value id="amount" width="48" same_line="true"/>
+						</vbox>
+					</hbox></align>
+				<cell cols="2"><void vexpand="true"/></cell>
+				<cell cols="2"><hsep pad.v="2" bg.color="bg" vreduce="true"/></cell>
+				<!-- feedback -->
+				<cell cols="2"><void vexpand="true"/></cell>
+				<cell cols="2">
+					<hbox pad.v="4" pad.h="6">
+					<button id="fb_on" width.min="98" text="labels.feedback" hfill="true" ui:inject="Button_cyan" height="19" />
+					<button id="fphase" width.min="98" text="labels.signal.phase" hfill="true" pad.l="6" ui:inject="Button_orange" height="19" />
+				</hbox>
+				</cell>
+					<hbox fill="false" pad.v="4" pad.h="6">
+						<knob id="fgain" pad.r="6"/>
+						<vbox>
+							<label text="labels.gain" />
+							<value id="fgain" width="48" same_line="true"/>
+						</vbox>
+
+					</hbox>
+					<hbox fill="false" pad.v="4" pad.r="6">
+						<knob id="fdelay" pad.r="6"/>
+						<vbox>
+							<label text="labels.delay" />
+							<value id="fdelay" width="48" same_line="true"/>
+						</vbox>
+
+					</hbox>
+
+				<cell cols="2"><void vexpand="true"/></cell>
+		</grid>
+</group>
+	</hbox>
 </plugin>
