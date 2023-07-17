@@ -215,7 +215,7 @@ namespace lsp
             "Plugin Template",
             B_UTILITIES,
             "", // TODO: provide ID of the video on YouTube
-            "" // TODO: write plugin description, should be the same to the english version in 'bundles.json'
+            "This plugin allows to simulate the flanging effect"
         };
 
         const plugin_t flanger_mono =

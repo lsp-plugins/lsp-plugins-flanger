@@ -1,9 +1,11 @@
 [Desktop Entry]
 Version=1.0
 Type=Application
-Name=TODO: Template Plugin
-GenericName=TODO: Template Plugin
-Comment=TODO: add description what plugin does
+Name=Flanger Stereo
+GenericName=Flanger
+GenericName[ru]=Флэнджер
+Comment=This tool allows to simulate the flanging effect for stereo signal
+Comment[ru]=Устройство, позволяющее симулировать эффект флэнджера для стереосигнала
 Exec=lsp-plugins-flanger-stereo
 Icon=lsp-plugins
 Terminal=false

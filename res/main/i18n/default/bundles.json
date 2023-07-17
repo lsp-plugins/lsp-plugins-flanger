@@ -1,7 +1,7 @@
 {
 	"flanger": {
-		"name": "Plugin Template",
-		"description": "TODO: write description"
+		"name": "Flanger",
+		"description": "This plugin allows to simulate the flanging effect"
 	}
 }
 
