@@ -806,10 +806,10 @@ namespace lsp
             // Draw horizontal and vertical lines
             cv->set_line_width(1.0);
             cv->set_color_rgb((bypassing) ? CV_SILVER: CV_YELLOW, 0.5f);
-            for (float i=1; i < 8; ++i)
+            for (size_t i=1; i < 8; ++i)
             {
-                float y = i * 45.0f;
-                float x = i * 0.0125f;
+                float y = (float(i) * (45.0f / 360.0f)) * height;
+                float x = float(i) * 0.125f * width;
                 cv->line(0, y, width, y);
                 cv->line(x, 0, x, height);
             }
