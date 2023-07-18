@@ -609,12 +609,12 @@ namespace lsp
                     channel_t *c            = &vChannels[nc];
                     phase                   = nPhase;
 
-                    // Apply oversampling and delay
+                    // Apply oversampling and delay stored into temporary buffer
                     uint32_t up_to_do       = to_do * oversampling;
                     float k_up_to_do        = 1.0f / float(up_to_do);
-                    c->sOversampler.upsample(c->vBuffer, c->vBuffer, to_do);
+                    c->sOversampler.upsample(vBuffer, c->vBuffer, to_do);
 
-                    // Apply the flanging effect
+                    // Apply the flanging effect on the vBuffer
                     if (c->pLfoFunc != NULL)
                     {
                         for (size_t i=0; i<up_to_do; ++i)
@@ -625,7 +625,7 @@ namespace lsp
                             float c_phase           = o_phase * c->fLfoArg[0] + c->fLfoArg[1];
                             float c_func            = c->pLfoFunc(c_phase);
 
-                            float c_sample          = c->vBuffer[i];
+                            float c_sample          = vBuffer[i];
                             c->sRing.append(c_sample);
                             c->fOutPhase            = o_phase;
                             c->fOutShift            = c_func;
@@ -657,7 +657,7 @@ namespace lsp
 
                             // Do the final processing
                             float c_rsample         = c_dsample + c_fbsample * lerp(fOldFeedGain, fFeedGain, s);
-                            c->vBuffer[i]           =
+                            vBuffer[i]              =
                                 c_sample +
                                 c_rsample * lerp(fOldAmount, fAmount, s);
                             c->sFeedback.append(c_rsample);
@@ -681,8 +681,8 @@ namespace lsp
                         c->fOutShift            = 0.0f;
                     }
 
-                    // Perform downsampling
-                    c->sOversampler.downsample(c->vBuffer, c->vBuffer, to_do);
+                    // Perform downsampling back into channel's buffer
+                    c->sOversampler.downsample(c->vBuffer, vBuffer, to_do);
 
                     // Update channel's phase shift
                     c->nOldPhaseShift       = c->nPhaseShift;
