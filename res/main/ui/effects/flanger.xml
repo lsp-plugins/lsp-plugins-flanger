@@ -28,15 +28,17 @@
 				<void vexpand="true"/>
 				<combo id="time" fill="false" pad.h="6" pad.v="4" width="108"/>
 				<vbox>
-					<hbox fill="false" pad.b="4" width="108" visibility=":time ieq 0">
+					<hbox fill="false" pad.b="1" width="108" height="38" visibility=":time ieq 0">
 						<align halign="-1">
-							<knob id="rate" />
+							<knob id="rate"/>
 						</align>
 						<value id="rate" width="52" sline="true" />
 					</hbox>
-					<hbox fill="false" pad.b="4" width="108" visibility=":time ieq 1">
+					<hbox fill="false" pad.b="1" width="108" height="38" visibility=":time ieq 1">
 						<align halign="-1">
-							<frac id="frac" pad.r="6" pad.b="2" pad.t="3" den.id="denom" max="8" color="green"/>
+							<hbox width="52">
+							<frac id="frac" pad.r="6" pad.b="2" pad.t="3" den.id="denom" max="8" color="green"  />
+						</hbox>
 						</align >
 						<value id="frac" width="52" sline="true" />
 					</hbox>
@@ -142,7 +144,7 @@
 			<group ui:inject="GraphGroup" ipadding="0" expand="true" fill="true" text="labels.graphs.LFO">
 				<graph width.min="200" expand="true" height.min="200" >
 					<origin hpos="-1" vpos="1" visibility="false" />
-	
+
 					<!-- Grid -->
 					<ui:with color="graph_alt_2">
 						<marker v="45" />
@@ -154,31 +156,31 @@
 						<marker v="0.625" ox="1" oy="0" />
 						<marker v="0.875" ox="1" oy="0" />
 					</ui:with>
-	
+
 					<ui:with color="graph_alt_1">
 						<marker v="90" />
 						<marker v="270" />
 						<marker v="0.25" ox="1" oy="0" />
 						<marker v="0.75" ox="1" oy="0" />
 					</ui:with>
-	
+
 					<ui:with color="graph_sec">
 						<marker v="180" />
 						<marker v="0.5" ox="1" oy="0" />
 					</ui:with>
-	
+
 					<!-- Axes -->
 					<axis min="0" max="360" angle="1.5" visibility="false"/>
 					<axis min="0" max="1" angle="0" visibility="false"/>
-	
+
 					<!-- Mesh -->
 					<mesh id="lfo" width="3" color="graph_mesh" smooth="true" visibility="(!ex :atype) or (:atype ieq 0)"/>
 					<mesh id="lfo" width="3" color="(ex :ms and :ms) ? 'mid' : 'left'" smooth="true" visibility="(ex :atype) and (:atype ine 0)"/>
 					<mesh id="alfo" width="3" color="(ex :ms and :ms) ? 'side' : 'right'" smooth="true" visibility="(ex :atype) and (:atype ine 0)"/>
-	
+
 					<!-- Dots and markers -->
 					<marker v="360.0 - 3.6*:xfade" color="graph_marker_cycle" color.a="0.5" />
-	
+
 					<ui:if test="!(ex :in_r)">
 						<marker v=":clsh" ox="1" oy="0" color="graph_mesh" color.a="0.65"/>
 						<dot x.id="clph" y.id="clsh" color="graph_mesh" bcolor="graph_mesh"/>
@@ -186,11 +188,11 @@
 					<ui:if test="ex :in_r">
 						<marker v=":clsh_l" ox="1" oy="0" color="(:ms) ? 'mid' : 'left'" color.a="0.65"/>
 						<marker v=":clsh_r" ox="1" oy="0" color="(:ms) ? 'side' : 'right'" color.a="0.65"/>
-	
+
 						<dot x.id="clph_l" y.id="clsh_l" color="(:ms) ? 'mid' : 'left'" bcolor="(:ms) ? 'mid' : 'left'"/>
 						<dot x.id="clph_r" y.id="clsh_r" color="(:ms) ? 'side' : 'right" bcolor="(:ms) ? 'side' : 'right'"/>
 					</ui:if>
-	
+
 					<!-- text -->
 					<text x="0" y="0" halign="1" valign="-1" text="graph.values.min" />
 					<text x="0" y="1" halign="-1" valign="-1" text="graph.values.max" />
@@ -199,7 +201,7 @@
 						<text x="${:i*45}" y="0" halign="1" valign="1" text="graph.values.x:deg" text:value="${:i*45}" />
 					</ui:for>
 					<text x="360" y="0" halign="1" valign="1" text="graph.axis.phase" />
-	
+
 					<text x="360.0 - 3.6*:xfade" y="1" halign="-1" valign="1" text="labels.lfo.crossfade" color="graph_marker_cycle" color.a="0.5"/>
 				</graph>
 			</group>
