@@ -214,7 +214,7 @@ namespace lsp
             "flanger",
             "Plugin Template",
             B_UTILITIES,
-            "", // TODO: provide ID of the video on YouTube
+            "_WD9GndORQA",
             "This plugin allows to simulate the flanging effect"
         };
 
