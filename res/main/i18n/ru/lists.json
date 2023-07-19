@@ -1,0 +1,43 @@
+{
+	"flanger": {
+		"osc": {
+			"circular": "Окружность",
+			"cubic": "Кубическая",
+			"logarithmic": "Логарифмическая",
+			"off": "Выключена",
+			"parabolic": "Параболическая",
+			"reverse_circular": "Инверсная окружность",
+			"reverse_logarithmic": "Инверсаня логарифмическая",
+			"reverse_parabolic": "Инверсная параболическая",
+			"reverse_square_root": "Инверсный квадратный корень",
+			"same": "Аналогичная",
+			"sine": "Синусоидальная",
+			"square_root": "Квадратный корень",
+			"stepped_cubic": "Ступенчатая кубическая",
+			"stepped_sine": "Ступенчатая синусоидальная",
+			"triangular": "Треугольная"
+		},
+		"oversampler": {
+			"2x_high": "2x Высоко",
+			"2x_medium": "2x Средне",
+			"3x_high": "3x Высоко",
+			"3x_medium": "3x Средне",
+			"4x_high": "4x Высоко",
+			"4x_medium": "4x Средне",
+			"6x_high": "6x Высоко",
+			"6x_medium": "6x Средне",
+			"8x_high": "8x Высоко",
+			"8x_medium": "8x Средне",
+			"none": "None"
+		},
+		"period": {
+			"first": "Первый",
+			"full": "Полный",
+			"last": "Последний"
+		},
+		"rate": {
+			"rate": "Частота",
+			"tempo": "Темп"
+		}
+	}
+}
