@@ -407,7 +407,6 @@ namespace lsp
 
                     c->sDelay.set_delay(c->sOversampler.latency());
                     c->sDelay.clear();
-                    c->sDelay.clear();
                     c->sRing.clear();
                     c->sFeedback.clear();
                 }
