@@ -571,7 +571,7 @@ namespace lsp
                 c->vOut                 = c->pOut->buffer<float>();
 
                 // Measure the input level
-                c->pInLevel->set_value(dsp::abs_max(c->vIn, samples));
+                c->pInLevel->set_value(dsp::abs_max(c->vIn, samples) * fInGain);
             }
 
             size_t oversampling     = vChannels[0].sOversampler.get_oversampling();
