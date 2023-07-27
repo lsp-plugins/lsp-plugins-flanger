@@ -90,17 +90,17 @@ namespace lsp
 
         static const port_item_t oversampling_mode[] =
         {
-            { "None",                   "flanger.oversampler.none"          },
-            { "2X Medium",              "flanger.oversampler.2x_medium"     },
-            { "2X High",                "flanger.oversampler.2x_high"       },
-            { "3X Medium",              "flanger.oversampler.3x_medium"     },
-            { "3X High",                "flanger.oversampler.3x_high"       },
-            { "4X Medium",              "flanger.oversampler.4x_medium"     },
-            { "4X High",                "flanger.oversampler.4x_high"       },
-            { "6X Medium",              "flanger.oversampler.6x_medium"     },
-            { "6X High",                "flanger.oversampler.6x_high"       },
-            { "8X Medium",              "flanger.oversampler.8x_medium"     },
-            { "8X High",                "flanger.oversampler.8x_high"       },
+            { "None",                   "oversampler.none"                  },
+            { "2x/16bit",               "oversampler.normal.2x16bit"        },
+            { "2x/24bit",               "oversampler.normal.2x24bit"        },
+            { "3x/16bit",               "oversampler.normal.3x16bit"        },
+            { "3x/24bit",               "oversampler.normal.3x24bit"        },
+            { "4x/16bit",               "oversampler.normal.4x16bit"        },
+            { "4x/24bit",               "oversampler.normal.4x24bit"        },
+            { "6x/16bit",               "oversampler.normal.6x16bit"        },
+            { "6x/24bit",               "oversampler.normal.6x24bit"        },
+            { "8x/16bit",               "oversampler.normal.8x16bit"        },
+            { "8x/24bit",               "oversampler.normal.8x24bit"        },
             { NULL,                     NULL}
         };
 

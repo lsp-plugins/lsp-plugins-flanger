@@ -55,16 +55,16 @@
 	<li><b>Oversampling</b> - oversampling mode.</li>
 	<ul>
 		<li><b>None</b> - no oversampling applied.</li>
-		<li><b>2x Medium</b> - 2x oversampling with 16-bit precision.</li>
-		<li><b>2x High</b> - 2x oversampling with 24-bit precision.</li>
-		<li><b>3x Medium</b> - 3x oversampling with 16-bit precision.</li>
-		<li><b>3x High</b> - 3x oversampling with 24-bit precision.</li>
-		<li><b>4x Medium</b> - 4x oversampling with 16-bit precision.</li>
-		<li><b>4x High</b> - 4x oversampling with 24-bit precision.</li>
-		<li><b>6x Medium</b> - 6x oversampling with 16-bit precision.</li>
-		<li><b>6x High</b> - 6x oversampling with 24-bit precision.</li>
-		<li><b>8x Medium</b> - 8x oversampling with 16-bit precision.</li>
-		<li><b>8x High</b> - 8x oversampling with 24-bit precision.</li>
+		<li><b>2x/16bit</b> - 2x oversampling with 16-bit precision.</li>
+		<li><b>2x/24bit</b> - 2x oversampling with 24-bit precision.</li>
+		<li><b>3x/16bit</b> - 3x oversampling with 16-bit precision.</li>
+		<li><b>3x/24bit</b> - 3x oversampling with 24-bit precision.</li>
+		<li><b>4x/16bit</b> - 4x oversampling with 16-bit precision.</li>
+		<li><b>4x/24bit</b> - 4x oversampling with 24-bit precision.</li>
+		<li><b>6x/16bit</b> - 6x oversampling with 16-bit precision.</li>
+		<li><b>6x/24bit</b> - 6x oversampling with 24-bit precision.</li>
+		<li><b>8x/16bit</b> - 8x oversampling with 16-bit precision.</li>
+		<li><b>8x/24bit</b> - 8x oversampling with 24-bit precision.</li>
 	</ul>
 	<li><b>Phase</b> - the button that allows to enable phase inversion of the delayed signal which is added to original one.</li>
 	<li><b>Amount</b> - the amount of the delayed signal.</li>
