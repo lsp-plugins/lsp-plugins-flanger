@@ -213,7 +213,7 @@ namespace lsp
         {
             "flanger",
             "Plugin Template",
-            B_UTILITIES,
+            B_EFFECTS,
             "_WD9GndORQA",
             "This plugin allows to simulate the flanging effect"
         };
