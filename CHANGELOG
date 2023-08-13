@@ -4,6 +4,7 @@
 
 === 1.0.1 ===
 * Fixed input gain meter.
+* Updated build scripts and dependencies.
 
 === 1.0.0 ===
 * Initial release.
