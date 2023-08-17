@@ -898,6 +898,8 @@ namespace lsp
 
         void flanger::dump(dspu::IStateDumper *v) const
         {
+            plug::Module::dump(v);
+
             v->write_object("sReset", &sReset);
 
             v->write("nChannels", nChannels);
