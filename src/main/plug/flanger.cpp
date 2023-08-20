@@ -407,7 +407,6 @@ namespace lsp
 
                     c->sDelay.set_delay(c->sOversampler.latency());
                     c->sDelay.clear();
-                    c->sDelay.clear();
                     c->sRing.clear();
                     c->sFeedback.clear();
                 }
@@ -571,7 +570,7 @@ namespace lsp
                 c->vOut                 = c->pOut->buffer<float>();
 
                 // Measure the input level
-                c->pInLevel->set_value(dsp::abs_max(c->vIn, samples));
+                c->pInLevel->set_value(dsp::abs_max(c->vIn, samples) * fInGain);
             }
 
             size_t oversampling     = vChannels[0].sOversampler.get_oversampling();
@@ -899,6 +898,8 @@ namespace lsp
 
         void flanger::dump(dspu::IStateDumper *v) const
         {
+            plug::Module::dump(v);
+
             v->write_object("sReset", &sReset);
 
             v->write("nChannels", nChannels);
