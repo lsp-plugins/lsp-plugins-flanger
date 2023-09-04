@@ -167,6 +167,9 @@ namespace lsp
                 static inline float     qlerp(float o_value, float n_value, float k);
                 static inline int32_t   ilerp(int32_t o_value, int32_t n_value, float k);
 
+            protected:
+                void                do_destroy();
+
             public:
                 explicit flanger(const meta::plugin_t *meta);
                 virtual ~flanger() override;
