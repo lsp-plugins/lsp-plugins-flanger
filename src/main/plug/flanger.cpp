@@ -298,10 +298,10 @@ namespace lsp
             pReset              = TRACE_PORT(ports[port_id++]);
             vChannels[0].pLfoMesh   = TRACE_PORT(ports[port_id++]);
             if (nChannels > 1)
+            {
                 vChannels[1].pLfoMesh   = TRACE_PORT(ports[port_id++]);
-
-            if (nChannels > 1)
                 pMsSwitch           = TRACE_PORT(ports[port_id++]);
+            }
             pDepthMin           = TRACE_PORT(ports[port_id++]);
             pDepth              = TRACE_PORT(ports[port_id++]);
             pSignalPhase        = TRACE_PORT(ports[port_id++]);
