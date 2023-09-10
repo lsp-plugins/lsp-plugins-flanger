@@ -123,12 +123,12 @@ namespace lsp
             vBuffer         = NULL;
             vLfoPhase       = NULL;
 
-            nOldDepthMin    = meta::flanger::DEPTH_MIN_DFL;
-            nDepthMin       = meta::flanger::DEPTH_MIN_DFL;
-            nOldDepth       = meta::flanger::DEPTH_DFL;
-            nDepth          = meta::flanger::DEPTH_DFL;
+            nOldDepthMin    = 0;
+            nDepthMin       = 0;
+            nOldDepth       = 0;
+            nDepth          = 0;
             nInitPhase      = 0;
-            nPhase          = meta::flanger::PHASE_DFL;
+            nPhase          = 0;
             nOldPhaseStep   = 0;
             nPhaseStep      = 0;
             nCrossfade      = 0;
@@ -184,7 +184,7 @@ namespace lsp
 
         flanger::~flanger()
         {
-            destroy();
+            do_destroy();
         }
 
         void flanger::init(plug::IWrapper *wrapper, plug::IPort **ports)
@@ -298,10 +298,10 @@ namespace lsp
             pReset              = TRACE_PORT(ports[port_id++]);
             vChannels[0].pLfoMesh   = TRACE_PORT(ports[port_id++]);
             if (nChannels > 1)
+            {
                 vChannels[1].pLfoMesh   = TRACE_PORT(ports[port_id++]);
-
-            if (nChannels > 1)
                 pMsSwitch           = TRACE_PORT(ports[port_id++]);
+            }
             pDepthMin           = TRACE_PORT(ports[port_id++]);
             pDepth              = TRACE_PORT(ports[port_id++]);
             pSignalPhase        = TRACE_PORT(ports[port_id++]);
@@ -336,7 +336,11 @@ namespace lsp
         void flanger::destroy()
         {
             Module::destroy();
+            do_destroy();
+        }
 
+        void flanger::do_destroy()
+        {
             // Destroy channels
             if (vChannels != NULL)
             {
