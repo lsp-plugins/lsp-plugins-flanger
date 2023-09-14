@@ -212,7 +212,7 @@ namespace lsp
         const meta::bundle_t flanger_bundle =
         {
             "flanger",
-            "Plugin Template",
+            "Flanger",
             B_EFFECTS,
             "_WD9GndORQA",
             "This plugin allows to simulate the flanging effect"
