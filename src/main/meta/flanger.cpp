@@ -25,7 +25,7 @@
 
 #define LSP_PLUGINS_FLANGER_VERSION_MAJOR       1
 #define LSP_PLUGINS_FLANGER_VERSION_MINOR       0
-#define LSP_PLUGINS_FLANGER_VERSION_MICRO       2
+#define LSP_PLUGINS_FLANGER_VERSION_MICRO       3
 
 #define LSP_PLUGINS_FLANGER_VERSION  \
     LSP_MODULE_VERSION( \
@@ -212,7 +212,7 @@ namespace lsp
         const meta::bundle_t flanger_bundle =
         {
             "flanger",
-            "Plugin Template",
+            "Flanger",
             B_EFFECTS,
             "_WD9GndORQA",
             "This plugin allows to simulate the flanging effect"
