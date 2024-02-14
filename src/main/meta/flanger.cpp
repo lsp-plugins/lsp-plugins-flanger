@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2020 Linux Studio Plugins Project <https://lsp-plug.in/>
- *           (C) 2020 Vladimir Sadovnikov <sadko4u@gmail.com>
+ * Copyright (C) 2024 Linux Studio Plugins Project <https://lsp-plug.in/>
+ *           (C) 2024 Vladimir Sadovnikov <sadko4u@gmail.com>
  *
  * This file is part of lsp-plugins-flanger
  * Created on: 25 нояб. 2020 г.
@@ -229,6 +229,8 @@ namespace lsp
             LSP_LV2_URI("flanger_mono"),
             LSP_LV2UI_URI("flanger_mono"),
             "lf1m",
+            LSP_VST3_UID("f1m     lf1m"),
+            LSP_VST3UI_UID("f1m     lf1m"),
             LSP_LADSPA_FLANGER_BASE + 0,
             LSP_LADSPA_URI("flanger_mono"),
             LSP_CLAP_URI("flanger_mono"),
@@ -254,6 +256,8 @@ namespace lsp
             LSP_LV2_URI("flanger_stereo"),
             LSP_LV2UI_URI("flanger_stereo"),
             "lf1s",
+            LSP_VST3_UID("f1s     lf1s"),
+            LSP_VST3UI_UID("f1s     lf1s"),
             LSP_LADSPA_FLANGER_BASE + 1,
             LSP_LADSPA_URI("flanger_stereo"),
             LSP_CLAP_URI("flanger_stereo"),
