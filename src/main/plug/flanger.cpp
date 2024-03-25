@@ -206,12 +206,9 @@ namespace lsp
                 return;
 
             // Initialize pointers to channels and temporary buffer
-            vChannels               = reinterpret_cast<channel_t *>(ptr);
-            ptr                    += szof_channels;
-            vBuffer                 = reinterpret_cast<float *>(ptr);
-            ptr                    += buf_sz;
-            vLfoPhase               = reinterpret_cast<float *>(ptr);
-            ptr                    += mesh_buf_sz;
+            vChannels               = advance_ptr_bytes<channel_t>(ptr, szof_channels);
+            vBuffer                 = advance_ptr_bytes<float>(ptr, buf_sz);
+            vLfoPhase               = advance_ptr_bytes<float>(ptr, mesh_buf_sz);
 
             for (size_t i=0; i < nChannels; ++i)
             {
@@ -238,10 +235,8 @@ namespace lsp
 
                 c->vIn                  = NULL;
                 c->vOut                 = NULL;
-                c->vBuffer              = reinterpret_cast<float *>(ptr);
-                ptr                    += buf_sz;
-                c->vLfoMesh             = reinterpret_cast<float *>(ptr);
-                ptr                    += mesh_buf_sz;
+                c->vBuffer              = advance_ptr_bytes<float>(ptr, buf_sz);
+                c->vLfoMesh             = advance_ptr_bytes<float>(ptr, mesh_buf_sz);
 
                 c->pIn                  = NULL;
                 c->pOut                 = NULL;
