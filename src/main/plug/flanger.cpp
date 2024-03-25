@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2020 Linux Studio Plugins Project <https://lsp-plug.in/>
- *           (C) 2020 Vladimir Sadovnikov <sadko4u@gmail.com>
+ * Copyright (C) 2024 Linux Studio Plugins Project <https://lsp-plug.in/>
+ *           (C) 2024 Vladimir Sadovnikov <sadko4u@gmail.com>
  *
  * This file is part of lsp-plugins-flanger
  * Created on: 25 нояб. 2020 г.
@@ -25,6 +25,7 @@
 #include <lsp-plug.in/dsp-units/units.h>
 #include <lsp-plug.in/plug-fw/meta/func.h>
 #include <lsp-plug.in/shared/id_colors.h>
+#include <lsp-plug.in/shared/debug.h>
 
 #include <private/plugins/flanger.h>
 
@@ -36,12 +37,6 @@ static constexpr float      PHASE_COEFF             = 1.0f / float(PHASE_MAX);
 
 namespace lsp
 {
-    static plug::IPort *TRACE_PORT(plug::IPort *p)
-    {
-        lsp_trace("  port id=%s", (p)->metadata()->id);
-        return p;
-    }
-
     namespace plugins
     {
         //---------------------------------------------------------------------
@@ -266,65 +261,65 @@ namespace lsp
 
             // Bind input audio ports
             for (size_t i=0; i<nChannels; ++i)
-                vChannels[i].pIn    = TRACE_PORT(ports[port_id++]);
+                BIND_PORT(vChannels[i].pIn);
 
             // Bind output audio ports
             for (size_t i=0; i<nChannels; ++i)
-                vChannels[i].pOut   = TRACE_PORT(ports[port_id++]);
+                BIND_PORT(vChannels[i].pOut);
 
             // Bind bypass
             lsp_trace("Binding common ports");
-            pBypass             = TRACE_PORT(ports[port_id++]);
+            BIND_PORT(pBypass);
             if (nChannels > 1)
-                pMono               = TRACE_PORT(ports[port_id++]);
-            pRate               = TRACE_PORT(ports[port_id++]);
-            pFraction           = TRACE_PORT(ports[port_id++]);
-            TRACE_PORT(ports[port_id++]);   // Skip denominator
-            pTempo              = TRACE_PORT(ports[port_id++]);
-            pTempoSync          = TRACE_PORT(ports[port_id++]);
-            pTimeMode           = TRACE_PORT(ports[port_id++]);
-            pCrossfade          = TRACE_PORT(ports[port_id++]);
-            pCrossfadeType      = TRACE_PORT(ports[port_id++]);
-            vChannels[0].pLfoType   = TRACE_PORT(ports[port_id++]);
-            vChannels[0].pLfoPeriod = TRACE_PORT(ports[port_id++]);
-            if (nChannels > 1)
-            {
-                vChannels[1].pLfoType   = TRACE_PORT(ports[port_id++]);
-                vChannels[1].pLfoPeriod = TRACE_PORT(ports[port_id++]);
-            }
-            pInitPhase          = TRACE_PORT(ports[port_id++]);
-            if (nChannels > 1)
-                pPhaseDiff          = TRACE_PORT(ports[port_id++]);
-            pReset              = TRACE_PORT(ports[port_id++]);
-            vChannels[0].pLfoMesh   = TRACE_PORT(ports[port_id++]);
+                BIND_PORT(pMono);
+            BIND_PORT(pRate);
+            BIND_PORT(pFraction);
+            SKIP_PORT("Denominator");   // Skip denominator
+            BIND_PORT(pTempo);
+            BIND_PORT(pTempoSync);
+            BIND_PORT(pTimeMode);
+            BIND_PORT(pCrossfade);
+            BIND_PORT(pCrossfadeType);
+            BIND_PORT(vChannels[0].pLfoType);
+            BIND_PORT(vChannels[0].pLfoPeriod);
             if (nChannels > 1)
             {
-                vChannels[1].pLfoMesh   = TRACE_PORT(ports[port_id++]);
-                pMsSwitch           = TRACE_PORT(ports[port_id++]);
+                BIND_PORT(vChannels[1].pLfoType);
+                BIND_PORT(vChannels[1].pLfoPeriod);
             }
-            pDepthMin           = TRACE_PORT(ports[port_id++]);
-            pDepth              = TRACE_PORT(ports[port_id++]);
-            pSignalPhase        = TRACE_PORT(ports[port_id++]);
-            pAmount             = TRACE_PORT(ports[port_id++]);
-            pOversampling       = TRACE_PORT(ports[port_id++]);
-            pFeedOn             = TRACE_PORT(ports[port_id++]);
-            pFeedGain           = TRACE_PORT(ports[port_id++]);
-            pFeedDelay          = TRACE_PORT(ports[port_id++]);
-            pFeedPhase          = TRACE_PORT(ports[port_id++]);
-            pInGain             = TRACE_PORT(ports[port_id++]);
-            pDry                = TRACE_PORT(ports[port_id++]);
-            pWet                = TRACE_PORT(ports[port_id++]);
-            pOutGain            = TRACE_PORT(ports[port_id++]);
+            BIND_PORT(pInitPhase);
+            if (nChannels > 1)
+                BIND_PORT(pPhaseDiff);
+            BIND_PORT(pReset);
+            BIND_PORT(vChannels[0].pLfoMesh);
+            if (nChannels > 1)
+            {
+                BIND_PORT(vChannels[1].pLfoMesh);
+                BIND_PORT(pMsSwitch);
+            }
+            BIND_PORT(pDepthMin);
+            BIND_PORT(pDepth);
+            BIND_PORT(pSignalPhase);
+            BIND_PORT(pAmount);
+            BIND_PORT(pOversampling);
+            BIND_PORT(pFeedOn);
+            BIND_PORT(pFeedGain);
+            BIND_PORT(pFeedDelay);
+            BIND_PORT(pFeedPhase);
+            BIND_PORT(pInGain);
+            BIND_PORT(pDry);
+            BIND_PORT(pWet);
+            BIND_PORT(pOutGain);
 
             // Bind output meters
             lsp_trace("Binding channel ports");
             for (size_t i=0; i<nChannels; ++i)
             {
                 channel_t *c            = &vChannels[i];
-                c->pPhase               = TRACE_PORT(ports[port_id++]);
-                c->pLfoShift            = TRACE_PORT(ports[port_id++]);
-                c->pInLevel             = TRACE_PORT(ports[port_id++]);
-                c->pOutLevel            = TRACE_PORT(ports[port_id++]);
+                BIND_PORT(c->pPhase);
+                BIND_PORT(c->pLfoShift);
+                BIND_PORT(c->pInLevel);
+                BIND_PORT(c->pOutLevel);
             }
 
             // Fill LFO phase data
