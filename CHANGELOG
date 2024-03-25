@@ -3,6 +3,7 @@
 *******************************************************************************
 
 === 1.0.7 ===
+* UI Crossfade marker is now editable with mouse.
 * Updated build scripts and dependencies.
 
 === 1.0.6 ===
