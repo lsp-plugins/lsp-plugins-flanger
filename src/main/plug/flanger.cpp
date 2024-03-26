@@ -191,7 +191,7 @@ namespace lsp
             size_t szof_channels    = align_size(sizeof(channel_t) * nChannels, OPTIMAL_ALIGN);
             size_t mesh_buf_sz      = align_size(meta::flanger::LFO_MESH_SIZE * sizeof(float), OPTIMAL_ALIGN);
             size_t buf_sz           = BUFFER_SIZE * sizeof(float);
-            size_t alloc            =
+            size_t to_alloc         =
                 szof_channels +         // vChannels
                 buf_sz +                // vBuffer
                 mesh_buf_sz +           // vLfoPhase
@@ -201,9 +201,10 @@ namespace lsp
                 ) * nChannels;
 
             // Allocate memory-aligned data
-            uint8_t *ptr            = alloc_aligned<uint8_t>(pData, alloc, OPTIMAL_ALIGN);
+            uint8_t *ptr            = alloc_aligned<uint8_t>(pData, to_alloc, OPTIMAL_ALIGN);
             if (ptr == NULL)
                 return;
+            lsp_guard_assert(uint8_t *save   = ptr);
 
             // Initialize pointers to channels and temporary buffer
             vChannels               = advance_ptr_bytes<channel_t>(ptr, szof_channels);
@@ -249,6 +250,7 @@ namespace lsp
                 c->pInLevel             = NULL;
                 c->pOutLevel            = NULL;
             }
+            lsp_assert(ptr <= &save[to_alloc]);
 
             // Bind ports
             lsp_trace("Binding input ports");
