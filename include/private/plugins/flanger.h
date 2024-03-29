@@ -155,6 +155,7 @@ namespace lsp
                 plug::IPort        *pInGain;            // Input gain
                 plug::IPort        *pDry;               // Dry gain
                 plug::IPort        *pWet;               // Wet gain
+                plug::IPort        *pDryWet;            // Dry/wet balance
                 plug::IPort        *pOutGain;           // Output gain
 
                 core::IDBuffer     *pIDisplay;          // Inline display buffer

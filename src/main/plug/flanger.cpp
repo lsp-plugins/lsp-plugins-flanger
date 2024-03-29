@@ -171,6 +171,7 @@ namespace lsp
             pInGain         = NULL;
             pDry            = NULL;
             pWet            = NULL;
+            pDryWet         = NULL;
             pOutGain        = NULL;
 
             pIDisplay       = NULL;
@@ -306,6 +307,7 @@ namespace lsp
             BIND_PORT(pInGain);
             BIND_PORT(pDry);
             BIND_PORT(pWet);
+            BIND_PORT(pDryWet);
             BIND_PORT(pOutGain);
 
             // Bind output meters
@@ -455,10 +457,14 @@ namespace lsp
             fFeedGain               = (pFeedPhase->value() >= 0.5f) ? -feed_gain : feed_gain;
             fOldInGain              = fInGain;
             fInGain                 = in_gain;
+
+            const float dry_gain    = pDry->value();
+            const float wet_gain    = pWet->value();
+            const float drywet      = pDryWet->value() * 0.01f;
             fOldDryGain             = fDryGain;
-            fDryGain                = pDry->value() * out_gain;
             fOldWetGain             = fWetGain;
-            fWetGain                = pWet->value() * out_gain;
+            fDryGain                = (dry_gain * drywet + 1.0f - drywet) * out_gain;
+            fWetGain                = wet_gain * drywet * out_gain;
             fAmount                 = (pSignalPhase->value() >= 0.5f) ? -amount_gain : amount_gain;
 
             bool custom_lfo         = false;

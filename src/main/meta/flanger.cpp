@@ -140,6 +140,7 @@ namespace lsp
             IN_GAIN,
             DRY_GAIN(0.0f),
             WET_GAIN(1.0f),
+            DRYWET(100.0f),
             OUT_GAIN,
 
             METER("clph", "Current LFO phase", U_DEG, flanger::PHASE),
@@ -190,6 +191,7 @@ namespace lsp
             IN_GAIN,
             DRY_GAIN(0.0f),
             WET_GAIN(1.0f),
+            DRYWET(100.0f),
             OUT_GAIN,
 
             METER("clph_l", "Current LFO phase left", U_DEG, flanger::PHASE),

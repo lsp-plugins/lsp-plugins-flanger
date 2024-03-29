@@ -221,20 +221,23 @@
 
 			<!-- Signal -->
 			<group hexpand="true" text="groups.signal">
-				<grid rows="3" cols="4">
+				<grid rows="3" cols="5">
 					<label text="labels.chan.input" />
 					<label text="labels.signal.dry" />
 					<label text="labels.signal.wet" />
+					<label text="labels.signal.drywet" />
 					<label text="labels.chan.output" />
 
 					<knob id="g_in" pad.h="6" pad.v="4"/>
 					<knob id="dry" scolor="dry" pad.h="6" pad.v="4"/>
 					<knob id="wet" scolor="wet" pad.h="6" pad.v="4"/>
+					<knob id="drywet" scolor="drywet" pad.h="6" pad.v="4"/>
 					<knob id="g_out" pad.h="6" pad.v="4"/>
 
 					<value id="g_in" width.min="56" sline="true"/>
 					<value id="dry" width.min="56" sline="true"/>
 					<value id="wet" width.min="56" sline="true"/>
+					<value id="drywet" width.min="56" sline="true"/>
 					<value id="g_out" width.min="56" sline="true"/>
 				</grid>
 			</group>
@@ -322,29 +325,29 @@
 				<cell cols="2"><hsep pad.v="2" bg.color="bg" vreduce="true"/></cell>
 				<!-- feedback -->
 				<ui:with bright=":fb_on ? 1 : 0.75" bg.bright=":fb_on ? 1.0 : :const_bg_darken">
-				<cell cols="2"><void vexpand="true"/></cell>
-				<cell cols="2">
-					<hbox pad.v="4" pad.h="6">
-						<button id="fb_on" width.min="98" text="labels.feedback" hfill="true" ui:inject="Button_cyan" height="19" />
-						<button id="fphase" width.min="98" text="labels.signal.phase" hfill="true" pad.l="6" ui:inject="Button_orange" height="19" />
+					<cell cols="2"><void vexpand="true"/></cell>
+					<cell cols="2">
+						<hbox pad.v="4" pad.h="6">
+							<button id="fb_on" width.min="98" text="labels.feedback" hfill="true" ui:inject="Button_cyan" height="19" />
+							<button id="fphase" width.min="98" text="labels.signal.phase" hfill="true" pad.l="6" ui:inject="Button_orange" height="19" />
+						</hbox>
+					</cell>
+					<hbox fill="false" pad.v="4" pad.h="6">
+						<knob id="fgain" pad.r="6" scolor=":fb_on ? 'kscale' : 'cycle_inactive'"/>
+						<vbox>
+							<label text="labels.gain" />
+							<value id="fgain" width="48" same_line="true"/>
+						</vbox>
 					</hbox>
-				</cell>
-				<hbox fill="false" pad.v="4" pad.h="6">
-					<knob id="fgain" pad.r="6" scolor=":fb_on ? 'kscale' : 'cycle_inactive'"/>
-					<vbox>
-						<label text="labels.gain" />
-						<value id="fgain" width="48" same_line="true"/>
-					</vbox>
-				</hbox>
-				<hbox fill="false" pad.v="4" pad.r="6">
-					<knob id="fdelay" pad.r="6" scolor=":fb_on ? 'kscale' : 'cycle_inactive'"/>
-					<vbox>
-						<label text="labels.delay" />
-						<value id="fdelay" width="48" same_line="true"/>
-					</vbox>
-				</hbox>
-				<cell cols="2"><void vexpand="true"/></cell>
-			</ui:with>
+					<hbox fill="false" pad.v="4" pad.r="6">
+						<knob id="fdelay" pad.r="6" scolor=":fb_on ? 'kscale' : 'cycle_inactive'"/>
+						<vbox>
+							<label text="labels.delay" />
+							<value id="fdelay" width="48" same_line="true"/>
+						</vbox>
+					</hbox>
+					<cell cols="2"><void vexpand="true"/></cell>
+				</ui:with>
 			</grid>
 		</group>
 	</hbox>
