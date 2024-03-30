@@ -162,7 +162,6 @@ namespace lsp
             pDepthMin       = NULL;
             pDepth          = NULL;
             pSignalPhase    = NULL;
-            pAmount         = NULL;
             pOversampling   = NULL;
             pFeedOn         = NULL;
             pFeedGain       = NULL;
@@ -298,7 +297,6 @@ namespace lsp
             BIND_PORT(pDepthMin);
             BIND_PORT(pDepth);
             BIND_PORT(pSignalPhase);
-            BIND_PORT(pAmount);
             BIND_PORT(pOversampling);
             BIND_PORT(pFeedOn);
             BIND_PORT(pFeedGain);
@@ -422,7 +420,6 @@ namespace lsp
             size_t srate            = fSampleRate * oversampling;
             bool fb_on              = pFeedOn->value() >= 0.5f;
             float feed_gain         = (fb_on) ? pFeedGain->value() : 0.0f;
-            float amount_gain       = pAmount->value();
             bool mid_side           = (pMsSwitch != NULL) ? pMsSwitch->value() >= 0.5f : false;
             float crossfade         = pCrossfade->value() * 0.01f;
 
@@ -465,7 +462,7 @@ namespace lsp
             fOldWetGain             = fWetGain;
             fDryGain                = (dry_gain * drywet + 1.0f - drywet) * out_gain;
             fWetGain                = wet_gain * drywet * out_gain;
-            fAmount                 = (pSignalPhase->value() >= 0.5f) ? -amount_gain : amount_gain;
+            fAmount                 = (pSignalPhase->value() >= 0.5f) ? -1.0f : 1.0f;
 
             bool custom_lfo         = false;
 
@@ -659,7 +656,6 @@ namespace lsp
                             // Do the final processing
                             float c_rsample         = c_dsample + c_fbsample * lerp(fOldFeedGain, fFeedGain, s);
                             vBuffer[i]              =
-                                c_sample +
                                 c_rsample * lerp(fOldAmount, fAmount, s);
                             c->sFeedback.append(c_rsample);
 
@@ -994,7 +990,6 @@ namespace lsp
             v->write("pDepthMin", pDepthMin);
             v->write("pDepth", pDepth);
             v->write("pSignalPhase", pSignalPhase);
-            v->write("pAmount", pAmount);
             v->write("pOversampling", pOversampling);
             v->write("pFeedOn", pFeedOn);
             v->write("pFeedGain", pFeedGain);

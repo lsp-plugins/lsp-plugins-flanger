@@ -146,7 +146,6 @@ namespace lsp
                 plug::IPort        *pDepthMin;          // Minimal depth
                 plug::IPort        *pDepth;             // Depth
                 plug::IPort        *pSignalPhase;       // Signal phase
-                plug::IPort        *pAmount;            // Amount
                 plug::IPort        *pOversampling;      // Oversampling
                 plug::IPort        *pFeedOn;            // Feedback enable switch
                 plug::IPort        *pFeedGain;          // Feedback gain

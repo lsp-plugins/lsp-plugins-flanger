@@ -113,7 +113,7 @@ namespace lsp
 
             BYPASS,
 
-            CONTROL("rate", "Rate", U_HZ, flanger::RATE),
+            LOG_CONTROL("rate", "Rate", U_HZ, flanger::RATE),
             CONTROL("frac", "Time fraction", U_BAR, flanger::FRACTION),
             CONTROL("denom", "Time fraction denominator", U_BAR, flanger::DENOMINATOR),
             CONTROL("tempo", "Tempo", U_BPM, flanger::TEMPO),
@@ -130,7 +130,6 @@ namespace lsp
             CONTROL("dmin", "Min depth", U_MSEC, flanger::DEPTH_MIN),
             CONTROL("depth", "Depth", U_MSEC, flanger::DEPTH),
             SWITCH("sphase", "Signal phase switch", 0.0f),
-            AMP_GAIN10("amount", "The overall amount of the effect", GAIN_AMP_M_6_DB),
             COMBO("ovs", "Oversampling", 0, oversampling_mode),
             SWITCH("fb_on", "Feedback on", 0),
             CONTROL("fgain", "Feedback gain", U_GAIN_AMP, flanger::FEEDBACK_GAIN),
@@ -138,8 +137,8 @@ namespace lsp
             SWITCH("fphase", "Feedback phase switch", 0.0f),
 
             IN_GAIN,
-            DRY_GAIN(0.0f),
-            WET_GAIN(1.0f),
+            DRY_GAIN(GAIN_AMP_0_DB),
+            WET_GAIN(GAIN_AMP_M_6_DB),
             DRYWET(100.0f),
             OUT_GAIN,
 
@@ -159,7 +158,7 @@ namespace lsp
             BYPASS,
 
             SWITCH("mono", "Test for mono compatibility", 0),
-            CONTROL("rate", "Rate", U_HZ, flanger::RATE),
+            LOG_CONTROL("rate", "Rate", U_HZ, flanger::RATE),
             CONTROL("frac", "Time fraction", U_BAR, flanger::FRACTION),
             CONTROL("denom", "Time fraction denominator", U_BAR, flanger::DENOMINATOR),
             CONTROL("tempo", "Tempo", U_BPM, flanger::TEMPO),
@@ -181,7 +180,6 @@ namespace lsp
             CONTROL("dmin", "Min depth", U_MSEC, flanger::DEPTH_MIN),
             CONTROL("depth", "Depth", U_MSEC, flanger::DEPTH),
             SWITCH("sphase", "Signal phase switch", 0.0f),
-            AMP_GAIN10("amount", "The overall amount of the effect", GAIN_AMP_0_DB),
             COMBO("ovs", "Oversampling", 0, oversampling_mode),
             SWITCH("fb_on", "Feedback on", 0),
             CONTROL("fgain", "Feedback gain", U_GAIN_AMP, flanger::FEEDBACK_GAIN),
@@ -189,8 +187,8 @@ namespace lsp
             SWITCH("fphase", "Feedback phase switch", 0.0f),
 
             IN_GAIN,
-            DRY_GAIN(0.0f),
-            WET_GAIN(1.0f),
+            DRY_GAIN(GAIN_AMP_0_DB),
+            WET_GAIN(GAIN_AMP_M_6_DB),
             DRYWET(100.0f),
             OUT_GAIN,
 

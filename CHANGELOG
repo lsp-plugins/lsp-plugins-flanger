@@ -5,6 +5,7 @@
 === 1.0.7 ===
 * UI Crossfade marker is now editable with mouse.
 * Added Dry/Wet balance knob.
+* Removed 'Amount' knob as it can be fully replaced by Dry/Wet/DryWet knobs.
 * Updated build scripts and dependencies.
 
 === 1.0.6 ===

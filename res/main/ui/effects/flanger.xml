@@ -313,13 +313,7 @@
 					<button id="sphase" text="labels.signal.phase" fill="false" pad.v="4" pad.h="6" ui:inject="Button_orange"  width="101" height="34" />
 				</align>
 				<align halign="-11">
-					<hbox fill="false" pad.v="4" pad.h="6">
-						<knob id="amount" pad.r="6"/>
-						<vbox>
-							<label text="labels.amount" />
-							<value id="amount" width="48" same_line="true"/>
-						</vbox>
-					</hbox>
+					<void /> <!-- TODO -->
 				</align>
 				<cell cols="2"><void vexpand="true"/></cell>
 				<cell cols="2"><hsep pad.v="2" bg.color="bg" vreduce="true"/></cell>
