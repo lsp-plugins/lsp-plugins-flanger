@@ -129,8 +129,6 @@ namespace lsp
             nCrossfade      = 0;
             fCrossfade      = PHASE_COEFF;
             pCrossfadeFunc  = qlerp;
-            fOldAmount      = 0.0f;
-            fAmount         = 0.0f;
             fOldFeedGain    = 0.0f;
             fFeedGain       = 0.0f;
             nOldFeedDelay   = 0;
@@ -456,13 +454,12 @@ namespace lsp
             fInGain                 = in_gain;
 
             const float dry_gain    = pDry->value();
-            const float wet_gain    = pWet->value();
+            const float wet_gain    = (pSignalPhase->value() < 0.5f) ? pWet->value() : -pWet->value();
             const float drywet      = pDryWet->value() * 0.01f;
             fOldDryGain             = fDryGain;
             fOldWetGain             = fWetGain;
             fDryGain                = (dry_gain * drywet + 1.0f - drywet) * out_gain;
             fWetGain                = wet_gain * drywet * out_gain;
-            fAmount                 = (pSignalPhase->value() >= 0.5f) ? -1.0f : 1.0f;
 
             bool custom_lfo         = false;
 
@@ -623,8 +620,7 @@ namespace lsp
                             float c_phase           = o_phase * c->fLfoArg[0] + c->fLfoArg[1];
                             float c_func            = c->pLfoFunc(c_phase);
 
-                            float c_sample          = vBuffer[i];
-                            c->sRing.append(c_sample);
+                            c->sRing.append(vBuffer[i]);
                             c->fOutPhase            = o_phase;
                             c->fOutShift            = c_func;
 
@@ -655,8 +651,7 @@ namespace lsp
 
                             // Do the final processing
                             float c_rsample         = c_dsample + c_fbsample * lerp(fOldFeedGain, fFeedGain, s);
-                            vBuffer[i]              =
-                                c_rsample * lerp(fOldAmount, fAmount, s);
+                            vBuffer[i]              = c_rsample;
                             c->sFeedback.append(c_rsample);
 
                             // Update the phase
@@ -736,7 +731,6 @@ namespace lsp
                 nOldDepthMin        = nDepthMin;
                 nOldDepth           = nDepth;
                 nOldPhaseStep       = nPhaseStep;
-                fOldAmount          = fAmount;
                 fOldFeedGain        = fFeedGain;
                 nOldFeedDelay       = nFeedDelay;
                 fOldInGain          = fInGain;
@@ -958,8 +952,6 @@ namespace lsp
             v->write("nCrossfade", nCrossfade);
             v->write("fCrossfade", fCrossfade);
             v->write("pCrossfadeFunc", pCrossfadeFunc);
-            v->write("fOldAmount", fOldAmount);
-            v->write("fAmount", fAmount);
             v->write("fOldFeedGain", fOldFeedGain);
             v->write("fFeedGain", fFeedGain);
             v->write("nOldFeedDelay", nOldFeedDelay);

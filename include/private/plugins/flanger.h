@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2020 Linux Studio Plugins Project <https://lsp-plug.in/>
- *           (C) 2020 Vladimir Sadovnikov <sadko4u@gmail.com>
+ * Copyright (C) 2024 Linux Studio Plugins Project <https://lsp-plug.in/>
+ *           (C) 2024 Vladimir Sadovnikov <sadko4u@gmail.com>
  *
  * This file is part of lsp-plugins-flanger
  * Created on: 25 нояб. 2020 г.
@@ -113,8 +113,6 @@ namespace lsp
                 uint32_t            nCrossfade;         // Cross-fade threshold
                 float               fCrossfade;         // Cross-fade coefficient
                 mix_func_t          pCrossfadeFunc;     // Cross-fade function
-                float               fOldAmount;         // Old overal amount
-                float               fAmount;            // The overall amount
                 float               fOldFeedGain;       // Old feedback gain
                 float               fFeedGain;          // Feed-back gain
                 size_t              nOldFeedDelay;      // Old feedback delay
