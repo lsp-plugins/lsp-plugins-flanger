@@ -588,8 +588,8 @@ namespace lsp
                         to_do
                     );
 
-                    dsp::lramp2(vChannels[0].vBuffer, vChannels[0].vBuffer, fOldInGain, fInGain, to_do);
-                    dsp::lramp2(vChannels[1].vBuffer, vChannels[1].vBuffer, fOldInGain, fInGain, to_do);
+                    dsp::lramp1(vChannels[0].vBuffer, fOldInGain, fInGain, to_do);
+                    dsp::lramp1(vChannels[1].vBuffer, fOldInGain, fInGain, to_do);
                 }
                 else
                 {
@@ -702,7 +702,7 @@ namespace lsp
 
                     // Mix dry/wet
                     dsp::lramp1(c->vBuffer, fOldWetGain, fWetGain, to_do);
-                    dsp::lramp_add2(c->vBuffer, vBuffer, fOldDryGain, fDryGain, to_do);
+                    dsp::lramp_add2(c->vBuffer, vBuffer, fOldDryGain*fOldInGain, fDryGain*fInGain, to_do);
                     c->pOutLevel->set_value(dsp::abs_max(c->vBuffer, to_do));
                 }
 
