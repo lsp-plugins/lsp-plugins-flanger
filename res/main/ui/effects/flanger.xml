@@ -57,7 +57,7 @@
 						<value id="xfade" same_line="true"/>
 					</vbox>
 				</hbox>
-				<combo id="xtype" fill="false" pad.h="6" pad.b="4" width="108"/>
+				<combo id="xtype" fill="false" pad.h="6" pad.v="4" width="108"/>
 				<void vexpand="true"/>
 
 				<cell rows="4"><vsep pad.h="2" bg.color="bg" hreduce="true"/></cell>
@@ -238,7 +238,7 @@
 		<!-- Controls and Signal -->
 		<vbox>
 			<!-- Controls -->
-			<group text="labels.controls" ipadding="0">
+			<group text="labels.controls" vexpand="true" ipadding="0">
 				<grid rows="10" cols="2">
 					<!-- mid/side -->
 					<cell cols="2">
