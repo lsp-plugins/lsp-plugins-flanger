@@ -67,7 +67,6 @@
 		<li><b>8x/24bit</b> - 8x oversampling with 24-bit precision.</li>
 	</ul>
 	<li><b>Phase</b> - the button that allows to enable phase inversion of the delayed signal which is added to original one.</li>
-	<li><b>Amount</b> - the amount of the delayed signal.</li>
 	<li><b>Feedback</b> - the button that switches on the feedback chain.</li>
 	<li><b>Feedback</b> - the knob that controls the amount of signal being fed back.</li>
     <li><b>Feedback Phase</b> - the button that allows to invert the polarity of the feedback signal.</li>
@@ -79,5 +78,6 @@
 	<li><b>Input</b> - the amount of input signal.</li>
 	<li><b>Dry</b> - the amount of dry (unprocessed) signal.</li>
 	<li><b>Wet</b> - the amount of wet (processed) signal.</li>
+	<li><b>Dry/Wet</b> - the balance between dry (unprocessed) signal and mixed signal formed by Dry/Wet knobs.</li>
 	<li><b>Output</b> - the output volume of the plugin.</li>
 </ul>

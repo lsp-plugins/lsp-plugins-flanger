@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2020 Linux Studio Plugins Project <https://lsp-plug.in/>
- *           (C) 2020 Vladimir Sadovnikov <sadko4u@gmail.com>
+ * Copyright (C) 2024 Linux Studio Plugins Project <https://lsp-plug.in/>
+ *           (C) 2024 Vladimir Sadovnikov <sadko4u@gmail.com>
  *
  * This file is part of lsp-plugins-flanger
  * Created on: 25 нояб. 2020 г.
@@ -25,6 +25,7 @@
 #include <lsp-plug.in/dsp-units/units.h>
 #include <lsp-plug.in/plug-fw/meta/func.h>
 #include <lsp-plug.in/shared/id_colors.h>
+#include <lsp-plug.in/shared/debug.h>
 
 #include <private/plugins/flanger.h>
 
@@ -36,12 +37,6 @@ static constexpr float      PHASE_COEFF             = 1.0f / float(PHASE_MAX);
 
 namespace lsp
 {
-    static plug::IPort *TRACE_PORT(plug::IPort *p)
-    {
-        lsp_trace("  port id=%s", (p)->metadata()->id);
-        return p;
-    }
-
     namespace plugins
     {
         //---------------------------------------------------------------------
@@ -134,8 +129,6 @@ namespace lsp
             nCrossfade      = 0;
             fCrossfade      = PHASE_COEFF;
             pCrossfadeFunc  = qlerp;
-            fOldAmount      = 0.0f;
-            fAmount         = 0.0f;
             fOldFeedGain    = 0.0f;
             fFeedGain       = 0.0f;
             nOldFeedDelay   = 0;
@@ -167,7 +160,6 @@ namespace lsp
             pDepthMin       = NULL;
             pDepth          = NULL;
             pSignalPhase    = NULL;
-            pAmount         = NULL;
             pOversampling   = NULL;
             pFeedOn         = NULL;
             pFeedGain       = NULL;
@@ -176,6 +168,7 @@ namespace lsp
             pInGain         = NULL;
             pDry            = NULL;
             pWet            = NULL;
+            pDryWet         = NULL;
             pOutGain        = NULL;
 
             pIDisplay       = NULL;
@@ -196,7 +189,7 @@ namespace lsp
             size_t szof_channels    = align_size(sizeof(channel_t) * nChannels, OPTIMAL_ALIGN);
             size_t mesh_buf_sz      = align_size(meta::flanger::LFO_MESH_SIZE * sizeof(float), OPTIMAL_ALIGN);
             size_t buf_sz           = BUFFER_SIZE * sizeof(float);
-            size_t alloc            =
+            size_t to_alloc         =
                 szof_channels +         // vChannels
                 buf_sz +                // vBuffer
                 mesh_buf_sz +           // vLfoPhase
@@ -206,17 +199,15 @@ namespace lsp
                 ) * nChannels;
 
             // Allocate memory-aligned data
-            uint8_t *ptr            = alloc_aligned<uint8_t>(pData, alloc, OPTIMAL_ALIGN);
+            uint8_t *ptr            = alloc_aligned<uint8_t>(pData, to_alloc, OPTIMAL_ALIGN);
             if (ptr == NULL)
                 return;
+            lsp_guard_assert(uint8_t *save   = ptr);
 
             // Initialize pointers to channels and temporary buffer
-            vChannels               = reinterpret_cast<channel_t *>(ptr);
-            ptr                    += szof_channels;
-            vBuffer                 = reinterpret_cast<float *>(ptr);
-            ptr                    += buf_sz;
-            vLfoPhase               = reinterpret_cast<float *>(ptr);
-            ptr                    += mesh_buf_sz;
+            vChannels               = advance_ptr_bytes<channel_t>(ptr, szof_channels);
+            vBuffer                 = advance_ptr_bytes<float>(ptr, buf_sz);
+            vLfoPhase               = advance_ptr_bytes<float>(ptr, mesh_buf_sz);
 
             for (size_t i=0; i < nChannels; ++i)
             {
@@ -243,10 +234,8 @@ namespace lsp
 
                 c->vIn                  = NULL;
                 c->vOut                 = NULL;
-                c->vBuffer              = reinterpret_cast<float *>(ptr);
-                ptr                    += buf_sz;
-                c->vLfoMesh             = reinterpret_cast<float *>(ptr);
-                ptr                    += mesh_buf_sz;
+                c->vBuffer              = advance_ptr_bytes<float>(ptr, buf_sz);
+                c->vLfoMesh             = advance_ptr_bytes<float>(ptr, mesh_buf_sz);
 
                 c->pIn                  = NULL;
                 c->pOut                 = NULL;
@@ -259,6 +248,7 @@ namespace lsp
                 c->pInLevel             = NULL;
                 c->pOutLevel            = NULL;
             }
+            lsp_assert(ptr <= &save[to_alloc]);
 
             // Bind ports
             lsp_trace("Binding input ports");
@@ -266,65 +256,65 @@ namespace lsp
 
             // Bind input audio ports
             for (size_t i=0; i<nChannels; ++i)
-                vChannels[i].pIn    = TRACE_PORT(ports[port_id++]);
+                BIND_PORT(vChannels[i].pIn);
 
             // Bind output audio ports
             for (size_t i=0; i<nChannels; ++i)
-                vChannels[i].pOut   = TRACE_PORT(ports[port_id++]);
+                BIND_PORT(vChannels[i].pOut);
 
             // Bind bypass
             lsp_trace("Binding common ports");
-            pBypass             = TRACE_PORT(ports[port_id++]);
+            BIND_PORT(pBypass);
             if (nChannels > 1)
-                pMono               = TRACE_PORT(ports[port_id++]);
-            pRate               = TRACE_PORT(ports[port_id++]);
-            pFraction           = TRACE_PORT(ports[port_id++]);
-            TRACE_PORT(ports[port_id++]);   // Skip denominator
-            pTempo              = TRACE_PORT(ports[port_id++]);
-            pTempoSync          = TRACE_PORT(ports[port_id++]);
-            pTimeMode           = TRACE_PORT(ports[port_id++]);
-            pCrossfade          = TRACE_PORT(ports[port_id++]);
-            pCrossfadeType      = TRACE_PORT(ports[port_id++]);
-            vChannels[0].pLfoType   = TRACE_PORT(ports[port_id++]);
-            vChannels[0].pLfoPeriod = TRACE_PORT(ports[port_id++]);
-            if (nChannels > 1)
-            {
-                vChannels[1].pLfoType   = TRACE_PORT(ports[port_id++]);
-                vChannels[1].pLfoPeriod = TRACE_PORT(ports[port_id++]);
-            }
-            pInitPhase          = TRACE_PORT(ports[port_id++]);
-            if (nChannels > 1)
-                pPhaseDiff          = TRACE_PORT(ports[port_id++]);
-            pReset              = TRACE_PORT(ports[port_id++]);
-            vChannels[0].pLfoMesh   = TRACE_PORT(ports[port_id++]);
+                BIND_PORT(pMono);
+            BIND_PORT(pRate);
+            BIND_PORT(pFraction);
+            SKIP_PORT("Denominator");   // Skip denominator
+            BIND_PORT(pTempo);
+            BIND_PORT(pTempoSync);
+            BIND_PORT(pTimeMode);
+            BIND_PORT(pCrossfade);
+            BIND_PORT(pCrossfadeType);
+            BIND_PORT(vChannels[0].pLfoType);
+            BIND_PORT(vChannels[0].pLfoPeriod);
             if (nChannels > 1)
             {
-                vChannels[1].pLfoMesh   = TRACE_PORT(ports[port_id++]);
-                pMsSwitch           = TRACE_PORT(ports[port_id++]);
+                BIND_PORT(vChannels[1].pLfoType);
+                BIND_PORT(vChannels[1].pLfoPeriod);
             }
-            pDepthMin           = TRACE_PORT(ports[port_id++]);
-            pDepth              = TRACE_PORT(ports[port_id++]);
-            pSignalPhase        = TRACE_PORT(ports[port_id++]);
-            pAmount             = TRACE_PORT(ports[port_id++]);
-            pOversampling       = TRACE_PORT(ports[port_id++]);
-            pFeedOn             = TRACE_PORT(ports[port_id++]);
-            pFeedGain           = TRACE_PORT(ports[port_id++]);
-            pFeedDelay          = TRACE_PORT(ports[port_id++]);
-            pFeedPhase          = TRACE_PORT(ports[port_id++]);
-            pInGain             = TRACE_PORT(ports[port_id++]);
-            pDry                = TRACE_PORT(ports[port_id++]);
-            pWet                = TRACE_PORT(ports[port_id++]);
-            pOutGain            = TRACE_PORT(ports[port_id++]);
+            BIND_PORT(pInitPhase);
+            if (nChannels > 1)
+                BIND_PORT(pPhaseDiff);
+            BIND_PORT(pReset);
+            BIND_PORT(vChannels[0].pLfoMesh);
+            if (nChannels > 1)
+            {
+                BIND_PORT(vChannels[1].pLfoMesh);
+                BIND_PORT(pMsSwitch);
+            }
+            BIND_PORT(pDepthMin);
+            BIND_PORT(pDepth);
+            BIND_PORT(pSignalPhase);
+            BIND_PORT(pOversampling);
+            BIND_PORT(pFeedOn);
+            BIND_PORT(pFeedGain);
+            BIND_PORT(pFeedDelay);
+            BIND_PORT(pFeedPhase);
+            BIND_PORT(pInGain);
+            BIND_PORT(pDry);
+            BIND_PORT(pWet);
+            BIND_PORT(pDryWet);
+            BIND_PORT(pOutGain);
 
             // Bind output meters
             lsp_trace("Binding channel ports");
             for (size_t i=0; i<nChannels; ++i)
             {
                 channel_t *c            = &vChannels[i];
-                c->pPhase               = TRACE_PORT(ports[port_id++]);
-                c->pLfoShift            = TRACE_PORT(ports[port_id++]);
-                c->pInLevel             = TRACE_PORT(ports[port_id++]);
-                c->pOutLevel            = TRACE_PORT(ports[port_id++]);
+                BIND_PORT(c->pPhase);
+                BIND_PORT(c->pLfoShift);
+                BIND_PORT(c->pInLevel);
+                BIND_PORT(c->pOutLevel);
             }
 
             // Fill LFO phase data
@@ -428,7 +418,6 @@ namespace lsp
             size_t srate            = fSampleRate * oversampling;
             bool fb_on              = pFeedOn->value() >= 0.5f;
             float feed_gain         = (fb_on) ? pFeedGain->value() : 0.0f;
-            float amount_gain       = pAmount->value();
             bool mid_side           = (pMsSwitch != NULL) ? pMsSwitch->value() >= 0.5f : false;
             float crossfade         = pCrossfade->value() * 0.01f;
 
@@ -463,11 +452,14 @@ namespace lsp
             fFeedGain               = (pFeedPhase->value() >= 0.5f) ? -feed_gain : feed_gain;
             fOldInGain              = fInGain;
             fInGain                 = in_gain;
+
+            const float dry_gain    = pDry->value();
+            const float wet_gain    = (pSignalPhase->value() < 0.5f) ? pWet->value() : -pWet->value();
+            const float drywet      = pDryWet->value() * 0.01f;
             fOldDryGain             = fDryGain;
-            fDryGain                = pDry->value() * out_gain;
             fOldWetGain             = fWetGain;
-            fWetGain                = pWet->value() * out_gain;
-            fAmount                 = (pSignalPhase->value() >= 0.5f) ? -amount_gain : amount_gain;
+            fDryGain                = (dry_gain * drywet + 1.0f - drywet) * out_gain;
+            fWetGain                = wet_gain * drywet * out_gain;
 
             bool custom_lfo         = false;
 
@@ -596,8 +588,8 @@ namespace lsp
                         to_do
                     );
 
-                    dsp::lramp2(vChannels[0].vBuffer, vChannels[0].vBuffer, fOldInGain, fInGain, to_do);
-                    dsp::lramp2(vChannels[1].vBuffer, vChannels[1].vBuffer, fOldInGain, fInGain, to_do);
+                    dsp::lramp1(vChannels[0].vBuffer, fOldInGain, fInGain, to_do);
+                    dsp::lramp1(vChannels[1].vBuffer, fOldInGain, fInGain, to_do);
                 }
                 else
                 {
@@ -628,8 +620,7 @@ namespace lsp
                             float c_phase           = o_phase * c->fLfoArg[0] + c->fLfoArg[1];
                             float c_func            = c->pLfoFunc(c_phase);
 
-                            float c_sample          = vBuffer[i];
-                            c->sRing.append(c_sample);
+                            c->sRing.append(vBuffer[i]);
                             c->fOutPhase            = o_phase;
                             c->fOutShift            = c_func;
 
@@ -660,9 +651,7 @@ namespace lsp
 
                             // Do the final processing
                             float c_rsample         = c_dsample + c_fbsample * lerp(fOldFeedGain, fFeedGain, s);
-                            vBuffer[i]              =
-                                c_sample +
-                                c_rsample * lerp(fOldAmount, fAmount, s);
+                            vBuffer[i]              = c_rsample;
                             c->sFeedback.append(c_rsample);
 
                             // Update the phase
@@ -713,7 +702,7 @@ namespace lsp
 
                     // Mix dry/wet
                     dsp::lramp1(c->vBuffer, fOldWetGain, fWetGain, to_do);
-                    dsp::lramp_add2(c->vBuffer, vBuffer, fOldDryGain, fDryGain, to_do);
+                    dsp::lramp_add2(c->vBuffer, vBuffer, fOldDryGain*fOldInGain, fDryGain*fInGain, to_do);
                     c->pOutLevel->set_value(dsp::abs_max(c->vBuffer, to_do));
                 }
 
@@ -742,7 +731,6 @@ namespace lsp
                 nOldDepthMin        = nDepthMin;
                 nOldDepth           = nDepth;
                 nOldPhaseStep       = nPhaseStep;
-                fOldAmount          = fAmount;
                 fOldFeedGain        = fFeedGain;
                 nOldFeedDelay       = nFeedDelay;
                 fOldInGain          = fInGain;
@@ -964,8 +952,6 @@ namespace lsp
             v->write("nCrossfade", nCrossfade);
             v->write("fCrossfade", fCrossfade);
             v->write("pCrossfadeFunc", pCrossfadeFunc);
-            v->write("fOldAmount", fOldAmount);
-            v->write("fAmount", fAmount);
             v->write("fOldFeedGain", fOldFeedGain);
             v->write("fFeedGain", fFeedGain);
             v->write("nOldFeedDelay", nOldFeedDelay);
@@ -996,7 +982,6 @@ namespace lsp
             v->write("pDepthMin", pDepthMin);
             v->write("pDepth", pDepth);
             v->write("pSignalPhase", pSignalPhase);
-            v->write("pAmount", pAmount);
             v->write("pOversampling", pOversampling);
             v->write("pFeedOn", pFeedOn);
             v->write("pFeedGain", pFeedGain);

@@ -33,9 +33,9 @@ namespace lsp
     {
         typedef struct flanger
         {
-            static constexpr float  DEPTH_MIN_MIN       = 0.0f;
+            static constexpr float  DEPTH_MIN_MIN       = 0.01f;
             static constexpr float  DEPTH_MIN_MAX       = 10.0f;
-            static constexpr float  DEPTH_MIN_DFL       = 0.1f;
+            static constexpr float  DEPTH_MIN_DFL       = 0.25f;
             static constexpr float  DEPTH_MIN_STEP      = 0.003f;
 
             static constexpr float  DEPTH_MIN           = 0.1f;
