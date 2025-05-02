@@ -610,14 +610,14 @@ namespace lsp
                             c->fOutPhase            = o_phase;
                             c->fOutShift            = c_func;
 
-                            size_t c_shift          =
+                            float c_shift           =
                                 dspu::ilerp(nOldDepthMin, nDepthMin, s) +
                                 dspu::ilerp(nOldDepth, nDepth, s) * c_func;
-                            size_t c_fbshift        =
+                            float c_fbshift         =
                                 c_shift +
                                 dspu::ilerp(nOldFeedDelay, nFeedDelay, s);
-                            float c_dsample         = c->sRing.get(c_shift);
-                            float c_fbsample        = c->sFeedback.get(c_fbshift);
+                            float c_dsample         = c->sRing.lerp_get(c_shift);
+                            float c_fbsample        = c->sFeedback.lerp_get(c_fbshift);
 
                             // Perform cross-fade if required
                             if (i_phase < nCrossfade)
@@ -631,8 +631,8 @@ namespace lsp
                                 c_fbshift               =
                                     c_shift +
                                     dspu::ilerp(nOldFeedDelay, nFeedDelay, s);
-                                c_dsample               = pCrossfadeFunc(c->sRing.get(c_shift), c_dsample, mix);
-                                c_fbsample              = pCrossfadeFunc(c->sFeedback.get(c_fbshift), c_fbsample, mix);
+                                c_dsample               = pCrossfadeFunc(c->sRing.lerp_get(c_shift), c_dsample, mix);
+                                c_fbsample              = pCrossfadeFunc(c->sFeedback.lerp_get(c_fbshift), c_fbsample, mix);
                             }
 
                             // Do the final processing

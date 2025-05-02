@@ -3,6 +3,7 @@
 *******************************************************************************
 
 === 1.0.14 ===
+* Significantly reduced LFO noise.
 * Updated build scripts and dependencies.
 
 === 1.0.13 ===
