@@ -964,7 +964,7 @@ namespace lsp
             v->write("fFeedGain", fFeedGain);
             v->write("fOldFeedDrive", fOldFeedDrive);
             v->write("fFeedDrive", fFeedDrive);
-            v->write("nOldFeedDelay", fOldFeedDelay);
+            v->write("fOldFeedDelay", fOldFeedDelay);
             v->write("fFeedDelay", fFeedDelay);
             v->write("fOldInGain", fOldInGain);
             v->write("fInGain", fInGain);
