@@ -73,6 +73,11 @@ namespace lsp
             static constexpr float  FEEDBACK_DELAY_DFL  = 0.0f;
             static constexpr float  FEEDBACK_DELAY_STEP = 0.001f;
 
+            static constexpr float  FEEDBACK_DRIVE_MIN  = 0.0f;
+            static constexpr float  FEEDBACK_DRIVE_MAX  = 1.0f;
+            static constexpr float  FEEDBACK_DRIVE_DFL  = 0.0f;
+            static constexpr float  FEEDBACK_DRIVE_STEP = 0.025f;
+
             static constexpr float  TEMPO_MIN           = 20.0f;
             static constexpr float  TEMPO_MAX           = 360.0f;
             static constexpr float  TEMPO_STEP          = 0.1f;

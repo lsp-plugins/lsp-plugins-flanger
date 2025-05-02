@@ -278,20 +278,27 @@
 								<button id="fphase" width.min="134" text="labels.signal.phase" hfill="true" pad.l="6" ui:inject="Button_orange" height="19"/>
 							</hbox>
 						</cell>
-						<hbox fill="false" pad.v="4">
-							<knob id="fgain" pad.r="6" scolor=":fb_on ? 'kscale' : 'cycle_inactive'"/>
-							<vbox width.min="54">
-								<label text="labels.gain"/>
-								<value id="fgain" width="48" same_line="true"/>
-							</vbox>
-						</hbox>
-						<hbox fill="false" pad.v="4">
-							<knob id="fdelay" pad.r="6" scolor=":fb_on ? 'kscale' : 'cycle_inactive'"/>
-							<vbox width.min="54">
-								<label text="labels.delay"/>
-								<value id="fdelay" width="48" same_line="true"/>
-							</vbox>
-						</hbox>
+						<cell cols="2">
+							<hbox fill="false" pad.v="4">
+								<knob id="fgain" pad.r="6" scolor=":fb_on ? 'kscale' : 'cycle_inactive'"/>
+								<vbox width.min="54">
+									<label text="labels.gain"/>
+									<value id="fgain" width="48" same_line="true"/>
+								</vbox>
+								
+								<knob id="fdrive" pad.r="6" scolor=":fb_on ? 'kscale' : 'cycle_inactive'"/>
+								<vbox width.min="54">
+									<label text="labels.signal.drive"/>
+									<value id="fdrive" width="48" same_line="true"/>
+								</vbox>
+
+								<knob id="fdelay" pad.r="6" scolor=":fb_on ? 'kscale' : 'cycle_inactive'"/>
+								<vbox width.min="54">
+									<label text="labels.delay"/>
+									<value id="fdelay" width="48" same_line="true"/>
+								</vbox>
+							</hbox>
+						</cell>
 						<cell cols="2"><void vexpand="true"/></cell>
 					</ui:with>
 				</grid>

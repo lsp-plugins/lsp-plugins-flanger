@@ -133,6 +133,7 @@ namespace lsp
             COMBO("ovs", "Oversampling", 0, oversampling_mode),
             SWITCH("fb_on", "Feedback on", 0),
             CONTROL("fgain", "Feedback gain", U_GAIN_AMP, flanger::FEEDBACK_GAIN),
+            CONTROL("fdrive", "Feedback drive", U_GAIN_AMP, flanger::FEEDBACK_DRIVE),
             CONTROL("fdelay", "Feedback delay", U_MSEC, flanger::FEEDBACK_DELAY),
             SWITCH("fphase", "Feedback phase switch", 0.0f),
 
@@ -183,6 +184,7 @@ namespace lsp
             COMBO("ovs", "Oversampling", 0, oversampling_mode),
             SWITCH("fb_on", "Feedback on", 0),
             CONTROL("fgain", "Feedback gain", U_GAIN_AMP, flanger::FEEDBACK_GAIN),
+            CONTROL("fdrive", "Feedback drive", U_GAIN_AMP, flanger::FEEDBACK_DRIVE),
             CONTROL("fdelay", "Feedback delay", U_MSEC, flanger::FEEDBACK_DELAY),
             SWITCH("fphase", "Feedback phase switch", 0.0f),
 

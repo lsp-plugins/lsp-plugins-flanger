@@ -115,6 +115,8 @@ namespace lsp
                 mix_func_t          pCrossfadeFunc;     // Cross-fade function
                 float               fOldFeedGain;       // Old feedback gain
                 float               fFeedGain;          // Feed-back gain
+                float               fOldFeedDrive;      // Old feed-back drive
+                float               fFeedDrive;         // Feedback drive
                 size_t              nOldFeedDelay;      // Old feedback delay
                 size_t              nFeedDelay;         // Feed-back delay
                 float               fOldInGain;         // Old input gain
@@ -147,6 +149,7 @@ namespace lsp
                 plug::IPort        *pOversampling;      // Oversampling
                 plug::IPort        *pFeedOn;            // Feedback enable switch
                 plug::IPort        *pFeedGain;          // Feedback gain
+                plug::IPort        *pFeedDrive;         // Feedback drive
                 plug::IPort        *pFeedDelay;         // Feedback delay
                 plug::IPort        *pFeedPhase;         // Feedback phase
                 plug::IPort        *pInGain;            // Input gain
