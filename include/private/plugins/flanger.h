@@ -117,8 +117,8 @@ namespace lsp
                 float               fFeedGain;          // Feed-back gain
                 float               fOldFeedDrive;      // Old feed-back drive
                 float               fFeedDrive;         // Feedback drive
-                size_t              nOldFeedDelay;      // Old feedback delay
-                size_t              nFeedDelay;         // Feed-back delay
+                float               fOldFeedDelay;      // Old feedback delay
+                float               fFeedDelay;         // Feed-back delay
                 float               fOldInGain;         // Old input gain
                 float               fInGain;            // Input gain
                 float               fOldDryGain;        // Old dry gain
