@@ -161,9 +161,6 @@ namespace lsp
 
             protected:
                 static inline uint32_t  phase_to_int(float phase);
-                static inline float     lerp(float o_value, float n_value, float k);
-                static inline float     qlerp(float o_value, float n_value, float k);
-                static inline int32_t   ilerp(int32_t o_value, int32_t n_value, float k);
 
             protected:
                 void                do_destroy();
