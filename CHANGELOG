@@ -3,7 +3,8 @@
 *******************************************************************************
 
 === 1.0.14 ===
-* Significantly reduced LFO noise.
+* Signigificantly reduced LFO noise.
+* Added Drive knob to the feedback chain.
 * Updated build scripts and dependencies.
 
 === 1.0.13 ===
