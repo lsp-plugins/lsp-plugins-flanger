@@ -5,6 +5,7 @@
 === 1.0.14 ===
 * Signigificantly reduced LFO noise.
 * Added Drive knob to the feedback chain.
+* Added presets.
 * Updated build scripts and dependencies.
 
 === 1.0.13 ===

@@ -245,7 +245,7 @@ namespace lsp
             E_DUMP_STATE | E_INLINE_DISPLAY,
             flanger_mono_ports,
             "effects/flanger.xml",
-            NULL,
+            "effects/flanger",
             mono_plugin_port_groups,
             &flanger_bundle
         };
@@ -275,7 +275,7 @@ namespace lsp
             E_DUMP_STATE | E_INLINE_DISPLAY,
             flanger_stereo_ports,
             "effects/flanger.xml",
-            NULL,
+            "effects/flanger",
             stereo_plugin_port_groups,
             &flanger_bundle
         };
