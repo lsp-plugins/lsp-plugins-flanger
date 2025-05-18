@@ -2,6 +2,9 @@
 * RECENT CHANGES
 *******************************************************************************
 
+=== 1.0.15 ===
+
+
 === 1.0.14 ===
 * Signigificantly reduced LFO noise.
 * Added Drive knob to the feedback chain.
