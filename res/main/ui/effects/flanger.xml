@@ -278,22 +278,44 @@
 								<button id="fphase" width.min="134" text="labels.signal.phase" hfill="true" pad.l="6" ui:inject="Button_orange" height="19"/>
 							</hbox>
 						</cell>
-						<hbox fill="false" pad.v="4">
-							<knob id="fgain" pad.r="6" scolor=":fb_on ? 'kscale' : 'cycle_inactive'"/>
-							<vbox width.min="54">
-								<label text="labels.gain"/>
-								<value id="fgain" width="48" same_line="true"/>
-							</vbox>
-						</hbox>
-						<hbox fill="false" pad.v="4">
-							<knob id="fdelay" pad.r="6" scolor=":fb_on ? 'kscale' : 'cycle_inactive'"/>
-							<vbox width.min="54">
-								<label text="labels.delay"/>
-								<value id="fdelay" width="48" same_line="true"/>
-							</vbox>
-						</hbox>
-						<cell cols="2"><void vexpand="true"/></cell>
 					</ui:with>
+
+						<cell cols="2">
+							<grid rows="2" cols="5" vexpand="true">
+								<cell cols="8"><hsep pad.v="2" bg.color="bg" vreduce="true"/></cell>
+								<ui:with bright=":fb_on ? 1 : 0.75" bg.bright=":fb_on ? 1.0 : :const_bg_darken">
+									<hbox fill="false" pad.v="4" pad.h="6">
+										<knob id="fgain" pad.r="6" scolor=":fb_on ? 'kscale' : 'cycle_inactive'"/>
+										<vbox width.min="4">
+											<label text="labels.gain"/>
+											<value id="fgain" width="48" same_line="true"/>
+										</vbox>
+									</hbox>
+								</ui:with>
+								<vsep pad.h="2" bg.color="bg" hreduce="true"/>
+								<ui:with bright=":fb_on ? 1 : 0.75" bg.bright=":fb_on ? 1.0 : :const_bg_darken">
+									<hbox fill="false" pad.v="4" pad.h="6">
+										<knob id="fdrive" pad.r="6" scolor=":fb_on ? 'kscale' : 'cycle_inactive'"/>
+										<vbox width.min="4">
+											<label text="labels.signal.drive"/>
+											<value id="fdrive" width="48" same_line="true"/>
+										</vbox>
+									</hbox>
+								</ui:with>
+								<vsep pad.h="2" bg.color="bg" hreduce="true"/>
+								<ui:with bright=":fb_on ? 1 : 0.75" bg.bright=":fb_on ? 1.0 : :const_bg_darken">
+									<hbox fill="false" pad.v="4" pad.h="6">
+										<knob id="fdelay" pad.r="6" scolor=":fb_on ? 'kscale' : 'cycle_inactive'"/>
+										<vbox width.min="4">
+											<label text="labels.delay"/>
+											<value id="fdelay" width="48" same_line="true"/>
+										</vbox>
+									</hbox>
+								</ui:with>
+							</grid>
+						</cell>
+						<cell cols="2"><void vexpand="true" bright=":fb_on ? 1 : 0.75" bg.bright=":fb_on ? 1.0 : :const_bg_darken"/></cell>
+
 				</grid>
 			</group>
 			<!-- Separator -->

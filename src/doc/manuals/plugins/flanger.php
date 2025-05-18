@@ -68,8 +68,9 @@
 	</ul>
 	<li><b>Phase</b> - the button that allows to enable phase inversion of the delayed signal which is added to original one.</li>
 	<li><b>Feedback</b> - the button that switches on the feedback chain.</li>
-	<li><b>Feedback</b> - the knob that controls the amount of signal being fed back.</li>
     <li><b>Feedback Phase</b> - the button that allows to invert the polarity of the feedback signal.</li>
+	<li><b>Feedback</b> - the knob that controls the amount of signal being fed back.</li>
+    <li><b>Feedback Drive</b> - the amount of input signal driven into feed-back delay line.</li>
     <li><b>Feedback Delay</b> - the additional delay which can be applied to the feedback signal.</li>
 </ul>
 

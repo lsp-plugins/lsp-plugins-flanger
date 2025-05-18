@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2024 Linux Studio Plugins Project <https://lsp-plug.in/>
- *           (C) 2024 Vladimir Sadovnikov <sadko4u@gmail.com>
+ * Copyright (C) 2025 Linux Studio Plugins Project <https://lsp-plug.in/>
+ *           (C) 2025 Vladimir Sadovnikov <sadko4u@gmail.com>
  *
  * This file is part of lsp-plugins-flanger
  * Created on: 25 нояб. 2020 г.
@@ -25,7 +25,7 @@
 
 #define LSP_PLUGINS_FLANGER_VERSION_MAJOR       1
 #define LSP_PLUGINS_FLANGER_VERSION_MINOR       0
-#define LSP_PLUGINS_FLANGER_VERSION_MICRO       13
+#define LSP_PLUGINS_FLANGER_VERSION_MICRO       14
 
 #define LSP_PLUGINS_FLANGER_VERSION  \
     LSP_MODULE_VERSION( \
@@ -113,28 +113,29 @@ namespace lsp
 
             BYPASS,
 
-            LOG_CONTROL("rate", "Rate", U_HZ, flanger::RATE),
-            CONTROL("frac", "Time fraction", U_BAR, flanger::FRACTION),
-            CONTROL("denom", "Time fraction denominator", U_BAR, flanger::DENOMINATOR),
-            CONTROL("tempo", "Tempo", U_BPM, flanger::TEMPO),
-            SWITCH("sync", "Tempo sync", 0.0f),
-            COMBO("time", "Time computing method", 0, rate_type),
-            CONTROL("xfade", "Crossfade", U_PERCENT, flanger::CROSSFADE),
-            COMBO("xtype", "Crossfade Type", 1, crossfade_type),
-            COMBO("type", "LFO type", 0, oscillator_functions),
-            COMBO("period", "LFO period", 0, oscillator_periods),
-            CYC_CONTROL("iphase", "Initial phase", U_DEG, flanger::PHASE),
-            TRIGGER("reset", "Reset phase to initial"),
+            LOG_CONTROL("rate", "Rate", "Rate", U_HZ, flanger::RATE),
+            CONTROL("frac", "Time fraction", "Frac", U_BAR, flanger::FRACTION),
+            CONTROL("denom", "Time fraction denominator", "Denom", U_BAR, flanger::DENOMINATOR),
+            CONTROL("tempo", "Tempo", "Tempo", U_BPM, flanger::TEMPO),
+            SWITCH("sync", "Tempo sync", "Sync tempo", 0.0f),
+            COMBO("time", "Time computing method", "Method", 0, rate_type),
+            CONTROL("xfade", "Crossfade", "Xfade", U_PERCENT, flanger::CROSSFADE),
+            COMBO("xtype", "Crossfade Type", "Xfade type", 1, crossfade_type),
+            COMBO("type", "LFO type", "LFO type", 0, oscillator_functions),
+            COMBO("period", "LFO period", "LFO period", 0, oscillator_periods),
+            CYC_CONTROL("iphase", "Initial phase", "LFO phase", U_DEG, flanger::PHASE),
+            TRIGGER("reset", "Reset phase to initial", "Reset"),
             MESH("lfo", "LFO graph", 2, flanger::LFO_MESH_SIZE),
 
-            CONTROL("dmin", "Min depth", U_MSEC, flanger::DEPTH_MIN),
-            CONTROL("depth", "Depth", U_MSEC, flanger::DEPTH),
-            SWITCH("sphase", "Signal phase switch", 0.0f),
-            COMBO("ovs", "Oversampling", 0, oversampling_mode),
-            SWITCH("fb_on", "Feedback on", 0),
-            CONTROL("fgain", "Feedback gain", U_GAIN_AMP, flanger::FEEDBACK_GAIN),
-            CONTROL("fdelay", "Feedback delay", U_MSEC, flanger::FEEDBACK_DELAY),
-            SWITCH("fphase", "Feedback phase switch", 0.0f),
+            CONTROL("dmin", "Min depth", "Min depth", U_MSEC, flanger::DEPTH_MIN),
+            CONTROL("depth", "Depth", "Depth", U_MSEC, flanger::DEPTH),
+            SWITCH("sphase", "Signal phase switch", "Phase", 0.0f),
+            COMBO("ovs", "Oversampling", "Oversampling", 0, oversampling_mode),
+            SWITCH("fb_on", "Feedback on", "Feed on", 0),
+            CONTROL("fgain", "Feedback gain", "Feed gain", U_GAIN_AMP, flanger::FEEDBACK_GAIN),
+            CONTROL("fdrive", "Feedback drive", "Feed drive", U_GAIN_AMP, flanger::FEEDBACK_DRIVE),
+            CONTROL("fdelay", "Feedback delay", "Feed delay", U_MSEC, flanger::FEEDBACK_DELAY),
+            SWITCH("fphase", "Feedback phase switch", "Feed phase", 0.0f),
 
             IN_GAIN,
             DRY_GAIN(GAIN_AMP_0_DB),
@@ -157,34 +158,35 @@ namespace lsp
 
             BYPASS,
 
-            SWITCH("mono", "Test for mono compatibility", 0),
-            LOG_CONTROL("rate", "Rate", U_HZ, flanger::RATE),
-            CONTROL("frac", "Time fraction", U_BAR, flanger::FRACTION),
-            CONTROL("denom", "Time fraction denominator", U_BAR, flanger::DENOMINATOR),
-            CONTROL("tempo", "Tempo", U_BPM, flanger::TEMPO),
-            SWITCH("sync", "Tempo sync", 0.0f),
-            COMBO("time", "Time computing method", 0, rate_type),
-            CONTROL("xfade", "Crossfade", U_PERCENT, flanger::CROSSFADE),
-            COMBO("xtype", "Crossfade Type", 1, crossfade_type),
-            COMBO("type", "LFO type", 0, oscillator_functions),
-            COMBO("period", "LFO period", 0, oscillator_periods),
-            COMBO("atype", "Additional LFO type", 0, additional_oscillator_functions),
-            COMBO("aperiod", "Additional LFO period", 0, oscillator_periods),
-            CYC_CONTROL("iphase", "Initial phase", U_DEG, flanger::PHASE),
-            CYC_CONTROL("dphase", "Phase difference between left and right", U_DEG, flanger::PHASE),
-            TRIGGER("reset", "Reset phase to initial"),
+            SWITCH("mono", "Test for mono compatibility", "Mono", 0),
+            LOG_CONTROL("rate", "Rate", "Rate", U_HZ, flanger::RATE),
+            CONTROL("frac", "Time fraction", "Frac", U_BAR, flanger::FRACTION),
+            CONTROL("denom", "Time fraction denominator", "Denom", U_BAR, flanger::DENOMINATOR),
+            CONTROL("tempo", "Tempo", "Tempo", U_BPM, flanger::TEMPO),
+            SWITCH("sync", "Tempo sync", "Sync tempo", 0.0f),
+            COMBO("time", "Time computing method", "Method", 0, rate_type),
+            CONTROL("xfade", "Crossfade", "Xfade", U_PERCENT, flanger::CROSSFADE),
+            COMBO("xtype", "Crossfade Type", "Xfade type", 1, crossfade_type),
+            COMBO("type", "LFO type", "LFO type", 0, oscillator_functions),
+            COMBO("period", "LFO period", "LFO period", 0, oscillator_periods),
+            COMBO("atype", "Additional LFO type", "LFO 2 type", 0, additional_oscillator_functions),
+            COMBO("aperiod", "Additional LFO period", "LFO 2 period", 0, oscillator_periods),
+            CYC_CONTROL("iphase", "Initial phase", "LFO phase", U_DEG, flanger::PHASE),
+            CYC_CONTROL("dphase", "Phase difference between left and right", "Inter-phase", U_DEG, flanger::PHASE),
+            TRIGGER("reset", "Reset phase to initial", "Reset"),
             MESH("lfo", "LFO graph", 2, flanger::LFO_MESH_SIZE),
             MESH("alfo", "Additional LFO graph", 2, flanger::LFO_MESH_SIZE),
 
-            SWITCH("ms", "Mid/Side mode switch", 0.0f),
-            CONTROL("dmin", "Min depth", U_MSEC, flanger::DEPTH_MIN),
-            CONTROL("depth", "Depth", U_MSEC, flanger::DEPTH),
-            SWITCH("sphase", "Signal phase switch", 0.0f),
-            COMBO("ovs", "Oversampling", 0, oversampling_mode),
-            SWITCH("fb_on", "Feedback on", 0),
-            CONTROL("fgain", "Feedback gain", U_GAIN_AMP, flanger::FEEDBACK_GAIN),
-            CONTROL("fdelay", "Feedback delay", U_MSEC, flanger::FEEDBACK_DELAY),
-            SWITCH("fphase", "Feedback phase switch", 0.0f),
+            SWITCH("ms", "Mid/Side mode switch", "M/S mode", 0.0f),
+            CONTROL("dmin", "Min depth", "Min depth", U_MSEC, flanger::DEPTH_MIN),
+            CONTROL("depth", "Depth", "Depth", U_MSEC, flanger::DEPTH),
+            SWITCH("sphase", "Signal phase switch", "Phase", 0.0f),
+            COMBO("ovs", "Oversampling", "Oversampling", 0, oversampling_mode),
+            SWITCH("fb_on", "Feedback on", "Feed on", 0),
+            CONTROL("fgain", "Feedback gain", "Feed gain", U_GAIN_AMP, flanger::FEEDBACK_GAIN),
+            CONTROL("fdrive", "Feedback drive", "Feed drive", U_GAIN_AMP, flanger::FEEDBACK_DRIVE),
+            CONTROL("fdelay", "Feedback delay", "Feed delay", U_MSEC, flanger::FEEDBACK_DELAY),
+            SWITCH("fphase", "Feedback phase switch", "Feed phase", 0.0f),
 
             IN_GAIN,
             DRY_GAIN(GAIN_AMP_0_DB),
@@ -243,7 +245,7 @@ namespace lsp
             E_DUMP_STATE | E_INLINE_DISPLAY,
             flanger_mono_ports,
             "effects/flanger.xml",
-            NULL,
+            "effects/flanger",
             mono_plugin_port_groups,
             &flanger_bundle
         };
@@ -273,7 +275,7 @@ namespace lsp
             E_DUMP_STATE | E_INLINE_DISPLAY,
             flanger_stereo_ports,
             "effects/flanger.xml",
-            NULL,
+            "effects/flanger",
             stereo_plugin_port_groups,
             &flanger_bundle
         };

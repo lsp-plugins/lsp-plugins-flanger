@@ -115,8 +115,10 @@ namespace lsp
                 mix_func_t          pCrossfadeFunc;     // Cross-fade function
                 float               fOldFeedGain;       // Old feedback gain
                 float               fFeedGain;          // Feed-back gain
-                size_t              nOldFeedDelay;      // Old feedback delay
-                size_t              nFeedDelay;         // Feed-back delay
+                float               fOldFeedDrive;      // Old feed-back drive
+                float               fFeedDrive;         // Feedback drive
+                float               fOldFeedDelay;      // Old feedback delay
+                float               fFeedDelay;         // Feed-back delay
                 float               fOldInGain;         // Old input gain
                 float               fInGain;            // Input gain
                 float               fOldDryGain;        // Old dry gain
@@ -147,6 +149,7 @@ namespace lsp
                 plug::IPort        *pOversampling;      // Oversampling
                 plug::IPort        *pFeedOn;            // Feedback enable switch
                 plug::IPort        *pFeedGain;          // Feedback gain
+                plug::IPort        *pFeedDrive;         // Feedback drive
                 plug::IPort        *pFeedDelay;         // Feedback delay
                 plug::IPort        *pFeedPhase;         // Feedback phase
                 plug::IPort        *pInGain;            // Input gain
@@ -161,9 +164,6 @@ namespace lsp
 
             protected:
                 static inline uint32_t  phase_to_int(float phase);
-                static inline float     lerp(float o_value, float n_value, float k);
-                static inline float     qlerp(float o_value, float n_value, float k);
-                static inline int32_t   ilerp(int32_t o_value, int32_t n_value, float k);
 
             protected:
                 void                do_destroy();
