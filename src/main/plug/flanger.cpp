@@ -40,6 +40,16 @@ namespace lsp
 {
     namespace plugins
     {
+        static float do_lerp(float a, float b, float k)
+        {
+            return lsp::dspu::lerp(a, b, k);
+        }
+
+        static float do_qlerp(float a, float b, float k)
+        {
+            return lsp::dspu::qlerp(a, b, k);
+        }
+
         //---------------------------------------------------------------------
         // Plugin factory
         static const meta::plugin_t *plugins[] =
@@ -114,7 +124,7 @@ namespace lsp
             nPhaseStep      = 0;
             nCrossfade      = 0;
             fCrossfade      = PHASE_COEFF;
-            pCrossfadeFunc  = dspu::qlerp;
+            pCrossfadeFunc  = do_qlerp;
             fOldFeedGain    = 0.0f;
             fFeedGain       = 0.0f;
             fOldFeedDrive   = 0.0f;
@@ -439,7 +449,7 @@ namespace lsp
             fFeedDelay              = dspu::millis_to_samples(srate, pFeedDelay->value());
             nCrossfade              = float(PHASE_MAX) * crossfade * 2;
             fCrossfade              = PHASE_COEFF * (1.0f - crossfade);
-            pCrossfadeFunc          = (int(pCrossfadeType->value()) == 0) ? dspu::lerp : dspu::qlerp;
+            pCrossfadeFunc          = (int(pCrossfadeType->value()) == 0) ? do_lerp : do_qlerp;
             fOldFeedGain            = fFeedGain;
             fFeedGain               = (feed_phase) ? -feed_gain : feed_gain;
             fOldFeedDrive           = fFeedDrive;
