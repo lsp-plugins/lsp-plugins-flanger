@@ -2,6 +2,9 @@
 * RECENT CHANGES
 *******************************************************************************
 
+=== 1.0.18 ===
+
+
 === 1.0.17 ===
 * Fixed linker warning for Windows.
 * Updated build scripts and dependencies.
