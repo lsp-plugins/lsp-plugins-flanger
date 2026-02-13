@@ -245,7 +245,7 @@ namespace lsp
             clap_features_mono,
             E_DUMP_STATE | E_INLINE_DISPLAY,
             flanger_mono_ports,
-            "effects/flanger.xml",
+            "plugins/effects/flanger.xml",
             "effects/flanger",
             mono_plugin_port_groups,
             &flanger_bundle
@@ -276,7 +276,7 @@ namespace lsp
             clap_features_stereo,
             E_DUMP_STATE | E_INLINE_DISPLAY,
             flanger_stereo_ports,
-            "effects/flanger.xml",
+            "plugins/effects/flanger.xml",
             "effects/flanger",
             stereo_plugin_port_groups,
             &flanger_bundle
