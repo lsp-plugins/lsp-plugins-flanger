@@ -248,7 +248,8 @@ namespace lsp
             "plugins/effects/flanger.xml",
             "effects/flanger",
             mono_plugin_port_groups,
-            &flanger_bundle
+            &flanger_bundle,
+            2
         };
         LSP_REGISTER_METADATA(flanger_mono);
 
@@ -279,12 +280,10 @@ namespace lsp
             "plugins/effects/flanger.xml",
             "effects/flanger",
             stereo_plugin_port_groups,
-            &flanger_bundle
+            &flanger_bundle,
+            1
         };
         LSP_REGISTER_METADATA(flanger_stereo);
 
     } /* namespace meta */
 } /* namespace lsp */
-
-
-
